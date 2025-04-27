@@ -25,3 +25,34 @@
 ```bash
 git clone https://github.com/kenji345Sar/expense-system.git
 cd expense-system
+
+
+# 🖊 MacからWindowsへのデータベース対応について
+
+- Mac側で MySQL データベース `laravel` から `dump.sql` を作成し、GitHubにpushしました。
+- Windows側では以下手順で環境を揃えています。
+
+### 手順
+
+1. GitHubから最新を取得
+    ```bash
+    git pull
+    ```
+
+2. dump.sql を MySQLコンテナにコピー
+    ```bash
+    docker cp dump.sql expense-system-mysql-1:/dump.sql
+    ```
+
+3. MySQLコンテナに入る
+    ```bash
+    docker exec -it expense-system-mysql-1 bash
+    ```
+
+4. dump.sql をインポート
+    ```bash
+    mysql -u root -p laravel < /dump.sql
+    ```
+
+（パスワードは `.env` に設定されているものを使用）
+
