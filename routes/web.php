@@ -34,6 +34,22 @@ Route::get('/entertainment_expenses/create', [EntertainmentExpenseController::cl
 Route::post('/entertainment_expenses', [EntertainmentExpenseController::class, 'store'])
     ->name('entertainment_expenses.store');
 
-    // 一覧表示
+// 一覧表示
 Route::get('/entertainment_expenses', [EntertainmentExpenseController::class, 'index'])
-->name('entertainment_expenses.index');
+    ->name('entertainment_expenses.index');
+
+// 接待交際費 詳細表示
+Route::get('/entertainment_expenses/{id}', [EntertainmentExpenseController::class, 'show'])
+    ->name('entertainment_expenses.show');
+
+// 接待交際費 編集画面表示
+Route::get('/entertainment_expenses/{id}/edit', [EntertainmentExpenseController::class, 'edit'])
+    ->name('entertainment_expenses.edit');
+
+// 接待交際費 更新処理
+Route::put('/entertainment_expenses/{id}', [EntertainmentExpenseController::class, 'update'])
+    ->name('entertainment_expenses.update');
+
+// 接待交際費 削除処理
+Route::delete('/entertainment_expenses/{id}', [EntertainmentExpenseController::class, 'destroy'])
+    ->name('entertainment_expenses.destroy');
