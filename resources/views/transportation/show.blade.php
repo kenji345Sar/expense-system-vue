@@ -20,10 +20,10 @@
     </ul>
 
     <p>
-        <a href="{{ route('transportation.edit', $item->id) }}">編集</a>
+        <a href="{{ route('transportation_expenses.edit', $item->id) }}">編集</a>
     </p>
 
-    <form method="POST" action="{{ route('transportation.destroy', $item->id) }}"
+    <form method="POST" action="{{ route('transportation_expenses.destroy', $item->id) }}"
         onsubmit="return confirm('本当に削除しますか？');">
         @csrf
         @method('DELETE')
@@ -31,7 +31,7 @@
     </form>
 
 
-    <p><a href="{{ url('/transportation') }}">← 一覧に戻る</a></p>
+    <p><a href="{{ url('/transportation_expenses') }}">← 一覧に戻る</a></p>
 </body>
 
 </html>

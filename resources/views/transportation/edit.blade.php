@@ -1,5 +1,5 @@
 <h1>申請内容を編集</h1>
-<form action="{{ route('transportation.update', $item->id) }}" method="POST">
+<form action="{{ route('transportation_expenses.update', $item->id) }}" method="POST">
     @csrf
     @method('PUT')
 
@@ -14,4 +14,4 @@
     <button type="submit">更新する</button>
 </form>
 
-<p><a href="{{ route('transportation.show', $item->id) }}">← 詳細に戻る</a></p>
+<p><a href="{{ route('transportation_expenses.show', $item->id) }}">← 詳細に戻る</a></p>

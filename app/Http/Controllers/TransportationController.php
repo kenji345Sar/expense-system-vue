@@ -51,17 +51,17 @@ class TransportationController extends Controller
         try {
             TransportationExpense::create($validated);
             Log::info('保存成功', $validated);
-            return redirect()->route('transportation.index')->with('message', '申請を登録しました！');
+            return redirect()->route('transportation_expenses.index')->with('message', '申請を登録しました！');
         } catch (\Exception $e) {
             Log::error('保存エラー：' . $e->getMessage());
-            return redirect('/transportation/create')->with('message', '保存に失敗しました');
+            return redirect('/transportation_expenses/create')->with('message', '保存に失敗しました');
         }
     }
 
     public function edit($id)
     {
         $item = TransportationExpense::findOrFail($id);
-        return view('transportation.edit', compact('item'));
+        return view('transportation_expenses.edit', compact('item'));
     }
 
     public function update(Request $request, $id)
@@ -78,13 +78,13 @@ class TransportationController extends Controller
         $item = TransportationExpense::findOrFail($id);
         $item->update($validated);
 
-        return redirect()->route('transportation.show', $id)->with('message', '更新しました！');
+        return redirect()->route('transportation_expenses.show', $id)->with('message', '更新しました！');
     }
 
     public function destroy($id)
     {
         TransportationExpense::findOrFail($id)->delete();
 
-        return redirect()->route('transportation.index')->with('message', '削除しました');
+        return redirect()->route('transportation_expenses.index')->with('message', '削除しました');
     }
 }
