@@ -4,7 +4,8 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\BusinessTripExpense;
-
+use App\Models\Expense;
+use Illuminate\Support\Facades\DB;
 
 class BusinessTripExpenseController extends Controller
 {
@@ -20,7 +21,7 @@ class BusinessTripExpenseController extends Controller
     {
 
         $validated = $request->validate([
-            'date' => 'required|date',
+            'business_trip_date' => 'required|date',
             'departure' => 'required|string|max:255',
             'destination' => 'required|string|max:255',
             'purpose' => 'required|string|max:255',
@@ -30,8 +31,21 @@ class BusinessTripExpenseController extends Controller
         ]);
 
 
+        DB::transaction(function () use ($validated) {
+            $item = BusinessTripExpense::create(array_merge($validated, [
+                'user_id' => 1, // ログイン未実装なら固定値
+            ]));
 
-        BusinessTripExpense::create($validated);
+            Expense::create([
+                'user_id' => 1,
+                'date' => $item->business_trip_date,
+                'amount' => $item->amount,
+                'description' => $item->place,
+                'expense_type' => 'business_trip',
+            ]);
+        });
+
+
 
         return redirect()->route('business_trip_expenses.index')->with('success', '登録が完了しました！');
     }
@@ -39,7 +53,7 @@ class BusinessTripExpenseController extends Controller
     // 一覧表示
     public function index()
     {
-        $expenses = BusinessTripExpense::orderBy('date', 'desc')->get();
+        $expenses = BusinessTripExpense::orderBy('business_trip_date', 'desc')->get();
         return view('business_trip_expenses.index', compact('expenses'));
     }
     // 詳細表示
@@ -58,7 +72,7 @@ class BusinessTripExpenseController extends Controller
     public function update(Request $request, $id)
     {
         $validated = $request->validate([
-            'date' => 'required|date',
+            'business_trip_date' => 'required|date',
             'departure' => 'required|string|max:255',
             'destination' => 'required|string|max:255',
             'purpose' => 'required|string|max:255', // ← 追加！
@@ -67,16 +81,46 @@ class BusinessTripExpenseController extends Controller
             'remarks' => 'nullable|string',
         ]);
 
-        $expense = BusinessTripExpense::findOrFail($id);
-        $expense->update($validated);
+
+        DB::transaction(function () use ($validated, $id) {
+            $businessTrips = BusinessTripExpense::findOrFail($id);
+            $businessTrips->update($validated);
+
+            // 対応する expense レコードを更新（expense_type: supplies）
+            Expense::where([
+                ['expense_type', 'business_trip'],
+                ['user_id', $businessTrips->user_id],
+                ['date', $businessTrips->date],
+                ['description', $businessTrips->item_name],
+            ])->latest()->first()?->update([
+                'date' => $businessTrips->date,
+                'amount' => $businessTrips->total_price,
+                'description' => $businessTrips->item_name,
+            ]);
+        });
+
+
 
         return redirect()->route('business_trip_expenses.index')->with('success', '更新が完了しました！');
     }
     // 削除処理
     public function destroy($id)
     {
-        $expense = BusinessTripExpense::findOrFail($id);
-        $expense->delete();
+
+        DB::transaction(function () use ($id) {
+            $businessTrips = BusinessTripExpense::findOrFail($id);
+
+            // 該当の expenses レコードを削除（expense_typeとマッチする）
+            Expense::where([
+                ['expense_type', 'business_trip'],
+                ['user_id', $businessTrips->user_id],
+                ['date', $businessTrips->date],
+                ['description', $businessTrips->item_name],
+            ])->latest()->first()?->delete();
+
+            $businessTrips->delete();
+        });
+
 
         return redirect()->route('business_trip_expenses.index')->with('success', '削除が完了しました！');
     }

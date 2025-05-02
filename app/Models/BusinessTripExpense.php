@@ -8,7 +8,7 @@ class BusinessTripExpense extends Model
 {
     //
     protected $fillable = [
-        'date',
+        'business_trip_date',
         'departure',
         'destination',
         'transportation',

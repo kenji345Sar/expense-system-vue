@@ -6,7 +6,7 @@
 <table border="1">
   <tr>
     <th>日付</th>
-    <td>{{ $expense->date }}</td>
+    <td>{{ $expense->business_trip_date }}</td>
   </tr>
   <tr>
     <th>出発地</th>

@@ -78,7 +78,7 @@ class EntertainmentExpenseController extends Controller
         ]);
 
         $item  = EntertainmentExpense::findOrFail($id);
-        $item->update($validated);
+        $item ->update($validated);
 
         return redirect()->route('entertainment_expenses.index')
             ->with('success', '更新が完了しました！');
@@ -88,7 +88,7 @@ class EntertainmentExpenseController extends Controller
     {
         DB::transaction(function () use ($id) {
             $entertainment = EntertainmentExpense::findOrFail($id);
-
+    
             // expenses テーブル側も削除
             Expense::where('user_id', $entertainment->user_id)
                 ->where('date', $entertainment->entertainment_date)
@@ -96,11 +96,13 @@ class EntertainmentExpenseController extends Controller
                 ->where('description', $entertainment->place) // 登録時のdescriptionが place だった場合
                 ->where('expense_type', 'entertainment')
                 ->delete();
-
+    
             $entertainment->delete();
         });
-
+    
         return redirect()->route('entertainment_expenses.index')
             ->with('success', '削除が完了しました！');
     }
+
 }
+    

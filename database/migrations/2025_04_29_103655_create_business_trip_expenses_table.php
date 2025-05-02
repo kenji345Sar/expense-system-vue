@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('business_trip_expenses', function (Blueprint $table) {
             $table->id();
             $table->string('departure');               // 出発地
-            $table->date('date');                      // 出張日
+            $table->date('business_trip_date');                      // 出張日
             $table->string('destination');             // 目的地
             $table->string('purpose');                 // 目的
             $table->string('transportation')->nullable(); // 交通手段（任意）

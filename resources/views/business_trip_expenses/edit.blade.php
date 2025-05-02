@@ -7,7 +7,7 @@
   @csrf
   @method('PUT')
 
-  <p>日付: <input type="date" name="date" value="{{ old('date', $expense->date) }}"></p>
+  <p>日付: <input type="date" name="business_trip_date" value="{{ old('date', $expense->business_trip_date) }}"></p>
   <p>出発地: <input type="text" name="departure" value="{{ old('departure', $expense->departure) }}"></p>
   <p>到着地: <input type="text" name="destination" value="{{ old('destination', $expense->destination) }}"></p>
   <p>目的: <input type="text" name="purpose" value="{{ old('purpose', $expense->purpose) }}"></p>

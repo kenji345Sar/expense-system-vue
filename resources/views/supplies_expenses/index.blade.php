@@ -1,43 +1,61 @@
-<h1>備品・消耗品費 一覧</h1>
+@extends('layouts.app')
 
-@if (session('success'))
-<p style="color: green;">{{ session('success') }}</p>
-@endif
+@section('content')
+<div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+  <div class="flex justify-between items-center mb-6">
+    <h1 class="text-2xl font-semibold">備品・消耗品費 一覧</h1>
+    <a href="{{ route('supplies_expenses.create') }}"
+      class="inline-block px-4 py-2 bg-blue-600 text-block font-semibold rounded shadow hover:bg-blue-500 hover:shadow-md transition">
+      ＋新規作成
+    </a>
 
-<a href="{{ route('supplies_expenses.create') }}">新規作成</a>
 
-<table border="1">
-  <thead>
-    <tr>
-      <th>日付</th>
-      <th>品名</th>
-      <th>数量</th>
-      <th>単価</th>
-      <th>合計金額</th>
-      <th>備考</th>
-      <th>操作</th> <!-- 操作列を追加 -->
-    </tr>
-  </thead>
-  <tbody>
-    @foreach ($expenses as $expense)
-    <tr>
-      <td>{{ $expense->date }}</td>
-      <td>{{ $expense->item_name }}</td>
-      <td>{{ $expense->quantity }}</td>
-      <td>{{ number_format($expense->unit_price) }}円</td>
-      <td>{{ number_format($expense->total_price) }}円</td>
-      <td>{{ $expense->remarks }}</td>
-      <td>
-        <a href="{{ route('supplies_expenses.show', $expense->id) }}">詳細</a>
-        <a href="{{ route('supplies_expenses.edit', $expense->id) }}">編集</a>
+  </div>
+  <x-flash-message />
 
-        <form action="{{ route('supplies_expenses.destroy', $expense->id) }}" method="POST" style="display:inline;">
-          @csrf
-          @method('DELETE')
-          <button type="submit" onclick="return confirm('削除してよろしいですか？')">削除</button>
-        </form>
-      </td>
-    </tr>
-    @endforeach
-  </tbody>
-</table>
+  <div class="overflow-x-auto bg-white shadow rounded-lg">
+    <table class="min-w-full table-auto border-collapse border border-gray-300">
+      <thead class="bg-gray-100">
+        <tr>
+          <th class="px-4 py-2 border">日付</th>
+          <th class="px-4 py-2 border">品名</th>
+          <th class="px-4 py-2 border">数量</th>
+          <th class="px-4 py-2 border">単価</th>
+          <th class="px-4 py-2 border">合計金額</th>
+          <th class="px-4 py-2 border">備考</th>
+          <th class="px-4 py-2 border">操作</th>
+        </tr>
+      </thead>
+      <tbody>
+        @forelse ($expenses as $expense)
+        <tr>
+          <td class="px-4 py-2 border">{{ $expense->date ?? '-' }}</td>
+          <td class="px-4 py-2 border">{{ $expense->item_name }}</td>
+          <td class="px-4 py-2 border">{{ $expense->quantity }}</td>
+          <td class="px-4 py-2 border">{{ number_format($expense->unit_price) }}</td>
+          <td class="px-4 py-2 border">{{ number_format($expense->total_price) }}</td>
+          <td class="px-4 py-2 border">{{ $expense->note }}</td>
+          <td class="px-4 py-2 border text-center whitespace-nowrap">
+            <a href="{{ route('supplies_expenses.edit', $expense) }}"
+              class="text-blue-600 hover:underline font-medium">編集</a>
+            |
+            <form action="{{ route('supplies_expenses.destroy', $expense) }}" method="POST"
+              class="inline-block"
+              onsubmit="return confirm('本当に削除しますか？')">
+              @csrf
+              @method('DELETE')
+              <button type="submit" class="text-red-600 hover:underline font-medium">削除</button>
+            </form>
+          </td>
+
+        </tr>
+        @empty
+        <tr>
+          <td colspan="7" class="px-4 py-6 text-center text-gray-500">データはありません</td>
+        </tr>
+        @endforelse
+      </tbody>
+    </table>
+  </div>
+</div>
+@endsection

@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Models\SuppliesExpense;
 use App\Models\Expense;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Auth;
 
 class SuppliesExpenseController extends Controller
 {
@@ -28,11 +29,11 @@ class SuppliesExpenseController extends Controller
             'remarks' => 'nullable|string',
         ]);
 
+        $validated['user_id'] = Auth::id();
+
         DB::transaction(function () use ($validated) {
             // 元のテーブルに登録
-            $supplies = SuppliesExpense::create(array_merge($validated, [
-                'user_id' => 1,
-            ]));
+            $supplies = SuppliesExpense::create($validated);
 
             // 統合expensesテーブルにも登録
             Expense::create([
@@ -52,7 +53,10 @@ class SuppliesExpenseController extends Controller
     // 一覧表示
     public function index()
     {
-        $expenses = SuppliesExpense::orderBy('date', 'desc')->get();
+        $expenses = SuppliesExpense::where('user_id', Auth::id())
+            ->orderBy('created_at', 'desc') // または 'asc'
+            ->get();
+
         return view('supplies_expenses.index', compact('expenses'));
     }
 
