@@ -8,10 +8,12 @@ class EntertainmentExpense extends Model
 {
     //
     protected $fillable = [
-        'date',
+        'user_id',
+        'entertainment_date',
         'client_name',
         'place',
         'amount',
         'content',
+        'user_id',
     ];
 }

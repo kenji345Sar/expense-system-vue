@@ -14,5 +14,6 @@ class TransportationExpense extends Model
         'route',
         'amount',
         'remarks',
+        'user_id',
     ];
 }

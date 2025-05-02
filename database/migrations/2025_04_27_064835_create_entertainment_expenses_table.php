@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('entertainment_expenses', function (Blueprint $table) {
             $table->id();
-            $table->date('date');              // 利用日
+            $table->date('entertainment_date');              // 利用日
             $table->string('client_name');      // 接待相手
             $table->string('place');            // 場所
             $table->integer('amount');          // 金額

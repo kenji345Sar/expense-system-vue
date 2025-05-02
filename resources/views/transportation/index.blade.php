@@ -4,11 +4,12 @@
 
 @section('content')
 <h1>交通費申請一覧</h1>
-@if (session('message'))
-<p style="color: {{ session('message') == '保存に失敗しました' ? 'red' : 'green' }};">
-    {{ session('message') }}
-</p>
+@foreach (['success', 'error', 'warning', 'info'] as $msg)
+@if (session($msg))
+<p class="{{ $msg }}">{{ session($msg) }}</p>
 @endif
+@endforeach
+
 
 <table>
     <thead>

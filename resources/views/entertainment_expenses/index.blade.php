@@ -8,9 +8,11 @@
 
 <body>
     <h1>接待交際費一覧</h1>
-    @if (session('success'))
-    <p style="color: green;">{{ session('success') }}</p>
+    @foreach (['success', 'error', 'warning', 'info'] as $msg)
+    @if (session($msg))
+    <p class="{{ $msg }}">{{ session($msg) }}</p>
     @endif
+    @endforeach
     <a href="{{ route('entertainment_expenses.create') }}">新規作成</a>
 
     <table border="1" cellpadding="5" cellspacing="0">
@@ -27,7 +29,7 @@
         <tbody>
             @foreach ($expenses as $expense)
             <tr>
-                <td>{{ $expense->date }}</td>
+                <td>{{ $expense->entertainment_date }}</td>
                 <td>{{ $expense->client_name }}</td>
                 <td>{{ $expense->place }}</td>
                 <td>{{ $expense->amount }}</td>

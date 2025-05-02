@@ -4,7 +4,8 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\SuppliesExpense;
-
+use App\Models\Expense;
+use Illuminate\Support\Facades\DB;
 
 class SuppliesExpenseController extends Controller
 {
@@ -27,9 +28,25 @@ class SuppliesExpenseController extends Controller
             'remarks' => 'nullable|string',
         ]);
 
-        SuppliesExpense::create($validated);
+        DB::transaction(function () use ($validated) {
+            // 元のテーブルに登録
+            $supplies = SuppliesExpense::create(array_merge($validated, [
+                'user_id' => 1,
+            ]));
 
-        return redirect()->route('supplies_expenses.create')->with('success', '登録が完了しました！');
+            // 統合expensesテーブルにも登録
+            Expense::create([
+                'user_id' => 1,
+                'date' => $supplies->date,
+                'amount' => $supplies->total_price, // 金額としてtotal_priceを使う
+                'description' => $supplies->item_name,
+                'expense_type' => 'supplies',
+            ]);
+        });
+
+        return redirect()
+            ->route('supplies_expenses.index')
+            ->with('success', '登録が完了しました！');
     }
 
     // 一覧表示
@@ -54,7 +71,7 @@ class SuppliesExpenseController extends Controller
     }
 
     // 更新処理
-    public function update(Request $request, SuppliesExpense $supplies_expense)
+    public function update(Request $request, $id)
     {
         $validated = $request->validate([
             'date' => 'required|date',
@@ -65,16 +82,47 @@ class SuppliesExpenseController extends Controller
             'remarks' => 'nullable|string',
         ]);
 
-        $supplies_expense->update($validated);
+        DB::transaction(function () use ($validated, $id) {
+            $supplies = SuppliesExpense::findOrFail($id);
+            $supplies->update($validated);
 
-        return redirect()->route('supplies_expenses.index')->with('success', '更新が完了しました！');
+            // 対応する expense レコードを更新（expense_type: supplies）
+            Expense::where([
+                ['expense_type', 'supplies'],
+                ['user_id', $supplies->user_id],
+                ['date', $supplies->date],
+                ['description', $supplies->item_name],
+            ])->latest()->first()?->update([
+                'date' => $supplies->date,
+                'amount' => $supplies->total_price,
+                'description' => $supplies->item_name,
+            ]);
+        });
+
+        return redirect()
+            ->route('supplies_expenses.index')
+            ->with('success', '更新が完了しました！');
     }
 
     // 削除処理
-    public function destroy(SuppliesExpense $supplies_expense)
+    public function destroy($id)
     {
-        $supplies_expense->delete();
+        DB::transaction(function () use ($id) {
+            $supplies = SuppliesExpense::findOrFail($id);
 
-        return redirect()->route('supplies_expenses.index')->with('success', '削除が完了しました！');
+            // 該当の expenses レコードを削除（expense_typeとマッチする）
+            Expense::where([
+                ['expense_type', 'supplies'],
+                ['user_id', $supplies->user_id],
+                ['date', $supplies->date],
+                ['description', $supplies->item_name],
+            ])->latest()->first()?->delete();
+
+            $supplies->delete();
+        });
+
+        return redirect()
+            ->route('supplies_expenses.index')
+            ->with('success', '削除が完了しました！');
     }
 }

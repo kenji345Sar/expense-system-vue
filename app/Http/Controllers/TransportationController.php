@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use Illuminate\Support\Facades\Log;
 use App\Models\TransportationExpense;
 use Illuminate\Http\Request;
+use App\Models\Expense;
+use Illuminate\Support\Facades\DB;
 
 class TransportationController extends Controller
 {
@@ -13,13 +15,6 @@ class TransportationController extends Controller
         return view('transportation.create');
     }
 
-
-
-    // public function index()
-    // {
-    //     $transportation_expenses = TransportationExpense::all();
-    //     return view('transportation.index', compact('transportation_expenses'));
-    // }
 
     public function index()
     {
@@ -36,32 +31,37 @@ class TransportationController extends Controller
 
     public function store(Request $request)
     {
-        // dd($request->all());
-
-        // バリデーション（簡易）
         $validated = $request->validate([
             'use_date' => 'required|date',
             'departure' => 'required|string',
             'arrival' => 'required|string',
-            'route' => 'nullable|string',
+            'route' => 'required|string',
             'amount' => 'required|numeric',
-            'remarks' => 'nullable|string',
         ]);
 
-        try {
-            TransportationExpense::create($validated);
-            Log::info('保存成功', $validated);
-            return redirect()->route('transportation_expenses.index')->with('message', '申請を登録しました！');
-        } catch (\Exception $e) {
-            Log::error('保存エラー：' . $e->getMessage());
-            return redirect('/transportation_expenses/create')->with('message', '保存に失敗しました');
-        }
+        DB::transaction(function () use ($validated) {
+            $transport = TransportationExpense::create(array_merge($validated, [
+                'user_id' => 1, // ← auth()->id()が使えるようになれば変更
+            ]));
+
+            Expense::create([
+                'user_id' => 1,
+                'date' => $transport->use_date,
+                'amount' => $transport->amount,
+                'description' => $transport->route,
+                'expense_type' => 'transportation',
+            ]);
+        });
+
+        return redirect()
+            ->route('transportation_expenses.index')
+            ->with('success', '登録が完了しました！');
     }
 
     public function edit($id)
     {
         $item = TransportationExpense::findOrFail($id);
-        return view('transportation_expenses.edit', compact('item'));
+        return view('transportation.edit', compact('item'));
     }
 
     public function update(Request $request, $id)
@@ -70,21 +70,51 @@ class TransportationController extends Controller
             'use_date' => 'required|date',
             'departure' => 'required|string',
             'arrival' => 'required|string',
-            'route' => 'nullable|string',
+            'route' => 'required|string',
             'amount' => 'required|numeric',
-            'remarks' => 'nullable|string',
         ]);
 
-        $item = TransportationExpense::findOrFail($id);
-        $item->update($validated);
+        DB::transaction(function () use ($validated, $id) {
+            $transport = TransportationExpense::findOrFail($id);
+            $transport->update($validated);
 
-        return redirect()->route('transportation_expenses.show', $id)->with('message', '更新しました！');
+            // 経費統合テーブルも更新（user_id, date, descriptionでマッチ）
+            Expense::where([
+                ['expense_type', 'transportation'],
+                ['user_id', $transport->user_id],
+                ['date', $transport->use_date],
+                ['description', $transport->route],
+            ])->latest()->first()?->update([
+                'date' => $transport->use_date,
+                'amount' => $transport->amount,
+                'description' => $transport->route,
+            ]);
+        });
+
+        return redirect()
+            ->route('transportation_expenses.index')
+            ->with('success', '更新が完了しました！');
     }
 
     public function destroy($id)
     {
-        TransportationExpense::findOrFail($id)->delete();
+        DB::transaction(function () use ($id) {
+            $transport = TransportationExpense::findOrFail($id);
 
-        return redirect()->route('transportation_expenses.index')->with('message', '削除しました');
+            // expenses 側も削除（descriptionやuse_dateでマッチ）
+            Expense::where([
+                ['expense_type', 'transportation'],
+                ['user_id', $transport->user_id],
+                ['date', $transport->use_date],
+                ['description', $transport->route],
+            ])->latest()->first()?->delete();
+
+            // transportation_expenses も削除
+            $transport->delete();
+        });
+
+        return redirect()
+            ->route('transportation_expenses.index')
+            ->with('success', '削除が完了しました！');
     }
 }

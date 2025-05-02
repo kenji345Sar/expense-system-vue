@@ -8,6 +8,15 @@
 
 <body>
   <h1>接待交際費 編集</h1>
+  @if ($errors->any())
+  <div style="color: red;">
+    <ul>
+      @foreach ($errors->all() as $error)
+      <li>{{ $error }}</li>
+      @endforeach
+    </ul>
+  </div>
+  @endif
 
   <form action="{{ route('entertainment_expenses.update', $expense->id) }}" method="POST">
     @csrf
@@ -15,7 +24,7 @@
 
     <div>
       <label>利用日:</label>
-      <input type="date" name="date" value="{{ old('date', $expense->date) }}">
+      <input type="date" name="entertainment_date" value="{{ old('entertainment_date', $expense->entertainment_date) }}">
     </div>
 
     <div>

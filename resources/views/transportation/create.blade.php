@@ -20,7 +20,7 @@
     @endif
     <form method="POST" action="{{ route('transportation_expenses.store') }}">
         @csrf
-        <label>利用日: <<input type="date" name="use_date" value="{{ old('use_date') }}"></label><br><br>
+        <label>利用日: <input type="date" name="use_date" value="{{ old('use_date') }}"></label><br><br>
         <label>出発地: <input type="text" name="departure" value="{{ old('departure') }}"></label><br><br>
         <label>到着地: <input type="text" name="arrival" value="{{ old('arrival') }}"></label><br><br>
         <label>経路（任意）: <input type="text" name="route"></label><br><br>
