@@ -1,51 +1,56 @@
 @extends('layouts.app')
 
-@section('title', '接待交際費一覧')
-
 @section('content')
-<h1>接待交際費一覧</h1>
-@foreach (['success', 'error', 'warning', 'info'] as $msg)
-@if (session($msg))
-<p class="{{ $msg }}">{{ session($msg) }}</p>
-@endif
-@endforeach
+<div class="max-w-4xl mx-auto py-8">
+    <h2 class="text-2xl font-bold mb-6">接待交際費一覧</h2>
 
-<a href="{{ route('entertainment_expenses.create') }}">← 新規申請へ</a>
+    @foreach (['success', 'error', 'warning', 'info'] as $msg)
+    @if (session($msg))
+    <p class="mb-4 p-2 rounded bg-{{ $msg == 'success' ? 'green' : ($msg == 'error' ? 'red' : 'yellow') }}-100 text-{{ $msg == 'success' ? 'green' : ($msg == 'error' ? 'red' : 'yellow') }}-800">
+        {{ session($msg) }}
+    </p>
+    @endif
+    @endforeach
 
-<table border="1" cellpadding="5" cellspacing="0">
-    <thead>
-        <tr>
-            <th>利用日</th>
-            <th>接待相手</th>
-            <th>場所</th>
-            <th>金額</th>
-            <th>内容</th>
-            <th>操作</th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach ($expenses as $expense)
-        <tr>
-            <td>{{ $expense->entertainment_date }}</td>
-            <td>{{ $expense->client_name }}</td>
-            <td>{{ $expense->place }}</td>
-            <td>{{ $expense->amount }}</td>
-            <td>{{ $expense->content }}</td>
-            <td>
-                <a href="{{ route('entertainment_expenses.show', $expense->id) }}">詳細</a>
-                <a href="{{ route('entertainment_expenses.edit', $expense->id) }}">編集</a>
-                <form action="{{ route('entertainment_expenses.destroy', $expense->id) }}" method="POST" style="display: inline;">
-                    @csrf
-                    @method('DELETE')
-                    <button type="submit" onclick="return confirm('本当に削除しますか？')">削除</button>
-                </form>
+    <div class="mb-4">
+        <a href="{{ route('entertainment_expenses.create') }}" class="text-blue-600 hover:underline">＋ 新規申請</a>
+    </div>
 
-            </td>
-
-        </tr>
-        @endforeach
-    </tbody>
-</table>
-
-
+    <table class="min-w-full bg-white border border-gray-300">
+        <thead class="bg-gray-100">
+            <tr>
+                <th class="border px-4 py-2 text-left">利用日</th>
+                <th class="border px-4 py-2 text-left">接待相手</th>
+                <th class="border px-4 py-2 text-left">場所</th>
+                <th class="border px-4 py-2 text-left">金額</th>
+                <th class="border px-4 py-2 text-left">内容</th>
+                <th class="border px-4 py-2 text-left">操作</th>
+            </tr>
+        </thead>
+        <tbody>
+            @forelse ($entertainment_expenses as $expense)
+            <tr>
+                <td class="border px-4 py-2">{{ $expense->entertainment_date }}</td>
+                <td class="border px-4 py-2">{{ $expense->client_name }}</td>
+                <td class="border px-4 py-2">{{ $expense->place }}</td>
+                <td class="border px-4 py-2">{{ $expense->amount }}</td>
+                <td class="border px-4 py-2">{{ $expense->description }}</td>
+                <td class="border px-4 py-2 space-x-2">
+                    <a href="{{ route('entertainment_expenses.show', $expense->id) }}" class="text-blue-500 hover:underline">詳細</a>
+                    <a href="{{ route('entertainment_expenses.edit', $expense->id) }}" class="text-green-500 hover:underline">編集</a>
+                    <form action="{{ route('entertainment_expenses.destroy', $expense->id) }}" method="POST" class="inline">
+                        @csrf
+                        @method('DELETE')
+                        <button type="submit" class="text-red-500 hover:underline" onclick="return confirm('本当に削除しますか？')">削除</button>
+                    </form>
+                </td>
+            </tr>
+            @empty
+            <tr>
+                <td colspan="6" class="border px-4 py-2 text-center text-gray-500">データがありません。</td>
+            </tr>
+            @endforelse
+        </tbody>
+    </table>
+</div>
 @endsection

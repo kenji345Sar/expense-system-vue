@@ -3,51 +3,65 @@
 @section('title', '出張旅費一覧')
 
 @section('content')
-<h1>出張旅費一覧</h1>
-@foreach (['success', 'error', 'warning', 'info'] as $msg)
-@if (session($msg))
-<p class="{{ $msg }}">{{ session($msg) }}</p>
-@endif
-@endforeach
+<div class="max-w-6xl mx-auto py-8">
+  <h1 class="text-2xl font-bold mb-6">出張旅費一覧</h1>
 
-<a href="{{ route('business_trip_expenses.create') }}">新規作成</a>
+  @foreach (['success', 'error', 'warning', 'info'] as $msg)
+  @if (session($msg))
+  <p class="mb-4 p-2 rounded bg-{{ $msg == 'success' ? 'green' : ($msg == 'error' ? 'red' : 'yellow') }}-100 text-{{ $msg == 'success' ? 'green' : ($msg == 'error' ? 'red' : 'yellow') }}-800">
+    {{ session($msg) }}
+  </p>
+  @endif
+  @endforeach
 
-<table border="1">
-  <thead>
-    <tr>
+  <div class="mb-4">
+    <a href="{{ route('business_trip_expenses.create') }}" class="text-blue-600 hover:underline">＋ 新規申請</a>
+  </div>
 
-      <th>日付</th>
-      <th>出発地</th>
-      <th>到着地</th>
-      <th>交通手段</th>
-      <th>目的</th>
-      <th>金額</th>
-      <th>備考</th>
-      <th>操作</th>
-    </tr>
-  </thead>
-  <tbody>
-    @foreach ($expenses as $expense)
-    <tr>
-      <td>{{ $expense->business_trip_date }}</td>
-      <td>{{ $expense->departure }}</td>
-      <td>{{ $expense->destination }}</td>
-      <td>{{ $expense->transportation }}</td>
-      <td>{{ $expense->purpose }}</td>
-      <td>{{ number_format($expense->amount) }}円</td>
-      <td>{{ $expense->remarks }}</td>
-      <td>
-        <a href="{{ route('business_trip_expenses.show', $expense->id) }}">詳細</a>
-        <a href="{{ route('business_trip_expenses.edit', $expense->id) }}">編集</a>
-        <form action="{{ route('business_trip_expenses.destroy', $expense->id) }}" method="POST" style="display:inline;">
-          @csrf
-          @method('DELETE')
-          <button type="submit">削除</button>
-        </form>
-      </td>
-    </tr>
-    @endforeach
-  </tbody>
-</table>
+  <table class="min-w-full bg-white border border-gray-300">
+    <thead class="bg-gray-100">
+      <tr>
+        <th class="border px-4 py-2 text-left">日付</th>
+        <th class="border px-4 py-2 text-left">出発地</th>
+        <th class="border px-4 py-2 text-left">到着地</th>
+        <th class="border px-4 py-2 text-left">交通手段</th>
+        <th class="border px-4 py-2 text-left">目的</th>
+        <th class="border px-4 py-2 text-left">金額</th>
+        <th class="border px-4 py-2 text-left">備考</th>
+        <th class="border px-4 py-2 text-left">操作</th>
+      </tr>
+    </thead>
+    <tbody>
+      @forelse ($business_trip_expenses as $expense)
+      <tr>
+        <td class="border px-4 py-2">{{ $expense->business_trip_date }}</td>
+        <td class="border px-4 py-2">{{ $expense->departure }}</td>
+        <td class="border px-4 py-2">{{ $expense->destination }}</td>
+        <td class="border px-4 py-2">{{ $expense->transportation }}</td>
+        <td class="border px-4 py-2">{{ $expense->purpose }}</td>
+        <td class="border px-4 py-2">{{ number_format($expense->amount) }} 円</td>
+        <td class="border px-4 py-2">{{ $expense->remarks ?? '-' }}</td>
+        <td class="border px-4 py-2 space-x-2">
+          <a href="{{ route('business_trip_expenses.show', $expense->id) }}" class="text-blue-500 hover:underline">詳細</a>
+          <a href="{{ route('business_trip_expenses.edit', $expense->id) }}" class="text-green-500 hover:underline">編集</a>
+          <form action="{{ route('business_trip_expenses.destroy', $expense->id) }}" method="POST" class="inline">
+            @csrf
+            @method('DELETE')
+            <button type="submit" class="text-red-500 hover:underline" onclick="return confirm('本当に削除しますか？')">削除</button>
+          </form>
+        </td>
+      </tr>
+      @empty
+      <tr>
+        <td colspan="8" class="border px-4 py-2 text-center text-gray-500">データがありません。</td>
+      </tr>
+      @endforelse
+    </tbody>
+  </table>
 
+  <div class="mt-6 space-y-2">
+    <a href="{{ route('business_trip_expenses.create') }}" class="text-blue-500 hover:underline">← 新規申請へ</a><br>
+    <a href="{{ route('expenses.index') }}" class="text-blue-500 hover:underline">← 経費メニューへ戻る</a>
+  </div>
+</div>
 @endsection

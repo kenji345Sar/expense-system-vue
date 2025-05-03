@@ -25,7 +25,6 @@ class BusinessTripExpenseController extends Controller
             'departure' => 'required|string|max:255',
             'destination' => 'required|string|max:255',
             'purpose' => 'required|string|max:255',
-            'transportation' => 'required|string|max:255',
             'amount' => 'required|integer',
             'remarks' => 'nullable|string',
         ]);
@@ -53,20 +52,20 @@ class BusinessTripExpenseController extends Controller
     // 一覧表示
     public function index()
     {
-        $expenses = BusinessTripExpense::orderBy('business_trip_date', 'desc')->get();
-        return view('business_trip_expenses.index', compact('expenses'));
+        $business_trip_expenses = BusinessTripExpense::orderBy('business_trip_date', 'desc')->get();
+        return view('business_trip_expenses.index', compact('business_trip_expenses'));
     }
     // 詳細表示
     public function show($id)
     {
-        $expense = BusinessTripExpense::findOrFail($id);
-        return view('business_trip_expenses.show', compact('expense'));
+        $business_trip_expenses = BusinessTripExpense::findOrFail($id);
+        return view('business_trip_expenses.show', compact('business_trip_expenses'));
     }
     // 編集画面表示
     public function edit($id)
     {
-        $expense = BusinessTripExpense::findOrFail($id);
-        return view('business_trip_expenses.edit', compact('expense'));
+        $business_trip_expense = BusinessTripExpense::findOrFail($id);
+        return view('business_trip_expenses.edit', compact('business_trip_expense'));
     }
     // 更新処理
     public function update(Request $request, $id)
@@ -76,7 +75,6 @@ class BusinessTripExpenseController extends Controller
             'departure' => 'required|string|max:255',
             'destination' => 'required|string|max:255',
             'purpose' => 'required|string|max:255', // ← 追加！
-            'transportation' => 'required|string|max:255',
             'amount' => 'required|integer',
             'remarks' => 'nullable|string',
         ]);

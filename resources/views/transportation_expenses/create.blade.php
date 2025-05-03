@@ -1,0 +1,17 @@
+@extends('layouts.app')
+
+@section('content')
+<div class="max-w-2xl mx-auto py-8">
+    <h2 class="text-2xl font-bold mb-6">交通費申請フォーム</h2>
+
+    @include('transportation_expenses._errors')
+
+    <form action="{{ route('transportation_expenses.store') }}" method="POST" class="space-y-4">
+        @include('transportation_expenses._form')
+
+        <div class="flex justify-between">
+            <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded">申請</button>
+        </div>
+    </form>
+</div>
+@endsection

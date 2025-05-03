@@ -1,23 +1,19 @@
 @extends('layouts.app')
 
 @section('content')
-<h1>出張旅費 編集</h1>
+<div class="max-w-2xl mx-auto py-8">
+  <h2 class="text-2xl font-bold mb-6">出張旅費 編集</h2>
 
-<form action="{{ route('business_trip_expenses.update', $expense->id) }}" method="POST">
-  @csrf
-  @method('PUT')
+  @include('business_trip_expenses._errors')
 
-  <p>日付: <input type="date" name="business_trip_date" value="{{ old('date', $expense->business_trip_date) }}"></p>
-  <p>出発地: <input type="text" name="departure" value="{{ old('departure', $expense->departure) }}"></p>
-  <p>到着地: <input type="text" name="destination" value="{{ old('destination', $expense->destination) }}"></p>
-  <p>目的: <input type="text" name="purpose" value="{{ old('purpose', $expense->purpose) }}"></p>
-  <p>交通手段: <input type="text" name="transportation" value="{{ old('transportation', $expense->transportation) }}"></p>
-  <p>宿泊有無: <input type="checkbox" name="is_stay" value="1" {{ old('is_stay', $expense->is_stay) ? 'checked' : '' }}></p>
-  <p>金額: <input type="number" name="amount" value="{{ old('amount', $expense->amount) }}"></p>
-  <p>備考: <textarea name="remarks">{{ old('remarks', $expense->remarks) }}</textarea></p>
+  <form action="{{ route('business_trip_expenses.update', $business_trip_expense->id) }}" method="POST" class="space-y-4">
+    @php $edit = true; @endphp
+    @include('business_trip_expenses._form')
 
-  <button type="submit">更新</button>
-</form>
-
-<p><a href="{{ route('business_trip_expenses.index') }}">一覧に戻る</a></p>
+    <div class="flex justify-between">
+      <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded">更新する</button>
+      <a href="{{ route('business_trip_expenses.index') }}" class="text-blue-500">← 一覧に戻る</a>
+    </div>
+  </form>
+</div>
 @endsection

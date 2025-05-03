@@ -8,25 +8,25 @@ use Illuminate\Http\Request;
 use App\Models\Expense;
 use Illuminate\Support\Facades\DB;
 
-class TransportationController extends Controller
+class TransportationExpenseController  extends Controller
 {
     public function create()
     {
-        return view('transportation.create');
+        return view('transportation_expenses.create');
     }
 
 
     public function index()
     {
         $items = TransportationExpense::orderBy('use_date', 'desc')->get();
-        return view('transportation.index', compact('items'));
+        return view('transportation_expenses.index', compact('items'));
     }
 
 
     public function show($id)
     {
         $item = TransportationExpense::findOrFail($id);
-        return view('transportation.show', compact('item'));
+        return view('transportation_expenses.show', compact('item'));
     }
 
     public function store(Request $request)
@@ -60,8 +60,8 @@ class TransportationController extends Controller
 
     public function edit($id)
     {
-        $item = TransportationExpense::findOrFail($id);
-        return view('transportation.edit', compact('item'));
+        $transportation_expense = TransportationExpense::findOrFail($id);
+        return view('transportation_expenses.edit', compact('transportation_expense'));
     }
 
     public function update(Request $request, $id)

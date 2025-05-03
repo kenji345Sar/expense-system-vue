@@ -48,8 +48,8 @@ class EntertainmentExpenseController extends Controller
     // 一覧表示
     public function index()
     {
-        $expenses = EntertainmentExpense::orderBy('entertainment_date', 'desc')->get();
-        return view('entertainment_expenses.index', compact('expenses'));
+        $entertainment_expenses = EntertainmentExpense::orderBy('entertainment_date', 'desc')->get();
+        return view('entertainment_expenses.index', compact('entertainment_expenses'));
     }
 
     // 詳細表示
@@ -62,8 +62,8 @@ class EntertainmentExpenseController extends Controller
     // 編集画面表示
     public function edit($id)
     {
-        $expense = EntertainmentExpense::findOrFail($id);
-        return view('entertainment_expenses.edit', compact('expense'));
+        $entertainment_expense = EntertainmentExpense::findOrFail($id);
+        return view('entertainment_expenses.edit', compact('entertainment_expense'));
     }
 
     // 更新処理
@@ -78,7 +78,7 @@ class EntertainmentExpenseController extends Controller
         ]);
 
         $item  = EntertainmentExpense::findOrFail($id);
-        $item ->update($validated);
+        $item->update($validated);
 
         return redirect()->route('entertainment_expenses.index')
             ->with('success', '更新が完了しました！');
@@ -88,7 +88,7 @@ class EntertainmentExpenseController extends Controller
     {
         DB::transaction(function () use ($id) {
             $entertainment = EntertainmentExpense::findOrFail($id);
-    
+
             // expenses テーブル側も削除
             Expense::where('user_id', $entertainment->user_id)
                 ->where('date', $entertainment->entertainment_date)
@@ -96,13 +96,11 @@ class EntertainmentExpenseController extends Controller
                 ->where('description', $entertainment->place) // 登録時のdescriptionが place だった場合
                 ->where('expense_type', 'entertainment')
                 ->delete();
-    
+
             $entertainment->delete();
         });
-    
+
         return redirect()->route('entertainment_expenses.index')
             ->with('success', '削除が完了しました！');
     }
-
 }
-    

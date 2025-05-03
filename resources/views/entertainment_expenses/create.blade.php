@@ -1,49 +1,17 @@
 @extends('layouts.app')
 
-@section('title', '接待交際費申請フォーム')
-
 @section('content')
-<h1>接待交際費申請フォーム</h1>
+<div class="max-w-2xl mx-auto py-8">
+  <h2 class="text-2xl font-bold mb-6">接待交際費申請フォーム</h2>
 
-@if ($errors->any())
-<div style="color: red;">
-    <ul>
-        @foreach ($errors->all() as $error)
-        <li>{{ $error }}</li>
-        @endforeach
-    </ul>
+  @include('entertainment_expenses._errors')
+
+  <form action="{{ route('entertainment_expenses.store') }}" method="POST" class="space-y-4">
+    @include('entertainment_expenses._form')
+
+    <div class="flex justify-between">
+      <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded">申請</button>
+    </div>
+  </form>
 </div>
-@endif
-
-<form action="{{ route('entertainment_expenses.store') }}" method="POST">
-    @csrf
-
-    <div>
-        <label>利用日:</label>
-        <input type="date" name="entertainment_date" value="{{ old('entertainment_date') }}">
-    </div>
-
-    <div>
-        <label>接待相手:</label>
-        <input type="text" name="client_name" value="{{ old('client_name') }}">
-    </div>
-
-    <div>
-        <label>場所:</label>
-        <input type="text" name="place" value="{{ old('place') }}">
-    </div>
-
-    <div>
-        <label>金額:</label>
-        <input type="number" name="amount" value="{{ old('amount') }}">
-    </div>
-
-    <div>
-        <label>内容（任意）:</label>
-        <textarea name="description">{{ old('description') }}</textarea>
-    </div>
-
-    <button type="submit">申請</button>
-</form>
-
 @endsection
