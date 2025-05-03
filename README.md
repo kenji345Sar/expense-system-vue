@@ -1,58 +1,81 @@
-# expense-system 環境構築手順（Sailなし版）
+# expense-system（経費精算システム）
 
-このプロジェクトはもともと Laravel Sail を使っていましたが、  
-現在は Sail を使わず、Docker Compose で直接管理しています。
+このプロジェクトは Laravel を使った経費精算管理システムです。  
+備品・交通費・接待交際費などの申請を登録・編集・一覧・削除できる機能を持ちます。
 
-## 環境構成
+---
 
-- Laravel
-- MySQL
-- Redis
-- Mailpit
-- Selenium
-- Meilisearch（※使用しない場合はdocker-compose.ymlから除去可能）
+## 構成技術
 
-## 必要なツール
+-   Laravel 10.x
+-   MySQL 8.x
+-   Redis
 
-- Docker
-- Docker Compose
-- Git
+※ Laravel Sail は使用しておらず、`docker-compose` による構成で動作しています。
+
+---
+
+## 必要な環境
+
+-   Docker / Docker Compose
+-   Git
+-   ブラウザ（Chrome 等）
+
+---
 
 ## セットアップ手順
 
-1. プロジェクトをクローン
+### 1. リポジトリをクローン
 
 ```bash
 git clone https://github.com/kenji345Sar/expense-system.git
 cd expense-system
+```
 
+### 2. `.env` 作成と依存パッケージのインストール
 
-# 🖊 MacからWindowsへのデータベース対応について
+```bash
+cp .env.example .env
+docker-compose up -d --build
+docker-compose exec laravel.test composer install
+docker-compose exec laravel.test php artisan key:generate
+```
 
-- Mac側で MySQL データベース `laravel` から `dump.sql` を作成し、GitHubにpushしました。
-- Windows側では以下手順で環境を揃えています。
+### 3. MySQL データベース初期化（Mac → Windows 対応）
 
-### 手順
+#### Mac 側で作成した `dump.sql` を使用
 
-1. GitHubから最新を取得
-    ```bash
-    git pull
-    ```
+```bash
+# dump.sql をコンテナにコピー
+docker cp dump.sql expense-system-mysql-1:/dump.sql
 
-2. dump.sql を MySQLコンテナにコピー
-    ```bash
-    docker cp dump.sql expense-system-mysql-1:/dump.sql
-    ```
+# コンテナに入る
+docker exec -it expense-system-mysql-1 bash
 
-3. MySQLコンテナに入る
-    ```bash
-    docker exec -it expense-system-mysql-1 bash
-    ```
+# インポート実行
+mysql -u root -p laravel < /dump.sql
+```
 
-4. dump.sql をインポート
-    ```bash
-    mysql -u root -p laravel < /dump.sql
-    ```
+※パスワードは `.env` に記載されている値を使用してください。
 
-（パスワードは `.env` に設定されているものを使用）
+---
 
+## 認証機能について
+
+Laravel Breeze（Blade 版）を使用して認証機能を導入しています。
+
+```bash
+composer require laravel/breeze --dev
+php artisan breeze:install
+npm install && npm run build
+php artisan migrate
+```
+
+ログイン後、各種申請機能（備品・消耗品費など）を利用できます。
+
+---
+
+## 備考
+
+-   `storage/` や `vendor/` ディレクトリは `.gitignore` により Git 管理外です。
+-   `meilisearch` や `mailpit` などのサービスは使用していません（docker-compose.yml 上でも除外済み）。

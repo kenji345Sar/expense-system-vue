@@ -6,9 +6,9 @@
   <h2 class="text-2xl font-bold mb-6">備品・消耗品費 編集</h2>
 
   {{-- エラーメッセージ表示（共通化） --}}
-  @include('supplies_expenses._errors')
+  <x-error-messages />
 
-  <form action="{{ route('supplies_expenses.update', $supplies_expense->id) }}" method="POST" class="space-y-4">
+  <form action="{{ route('supplies_expenses.update', $supplies_expense->id) }}" method="POST" class="space-y-4" novalidate>
     @php $edit = true; @endphp
     @include('supplies_expenses._form')
 

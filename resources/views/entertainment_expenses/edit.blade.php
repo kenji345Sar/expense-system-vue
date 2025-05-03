@@ -4,9 +4,9 @@
 <div class="max-w-2xl mx-auto py-8">
   <h2 class="text-2xl font-bold mb-6">接待交際費 編集</h2>
 
-  @include('entertainment_expenses._errors')
+  <x-error-messages />
 
-  <form action="{{ route('entertainment_expenses.update', $entertainment_expense->id) }}" method="POST" class="space-y-4">
+  <form action="{{ route('entertainment_expenses.update', $entertainment_expense->id) }}" method="POST" class="space-y-4" novalidate>
     @php $edit = true; @endphp
     @include('entertainment_expenses._form')
 

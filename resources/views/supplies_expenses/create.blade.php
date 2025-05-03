@@ -6,9 +6,8 @@
   <h2 class="text-2xl font-bold mb-6">備品・消耗品費申請フォーム</h2>
 
   {{-- エラーメッセージ表示（共通化） --}}
-  @include('supplies_expenses._errors')
-
-  <form action="{{ route('supplies_expenses.store') }}" method="POST" class="space-y-4">
+  <x-error-messages />
+  <form action="{{ route('supplies_expenses.store') }}" method="POST" class="space-y-4" novalidate>
     @include('supplies_expenses._form')
 
     <div class="flex justify-between">

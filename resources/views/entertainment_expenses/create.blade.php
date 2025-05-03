@@ -6,7 +6,7 @@
 
   @include('entertainment_expenses._errors')
 
-  <form action="{{ route('entertainment_expenses.store') }}" method="POST" class="space-y-4">
+  <form action="{{ route('entertainment_expenses.store') }}" method="POST" class="space-y-4" novalidate>
     @include('entertainment_expenses._form')
 
     <div class="flex justify-between">

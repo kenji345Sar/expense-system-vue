@@ -1,37 +1,13 @@
-<!DOCTYPE html>
-<html lang="ja">
+@extends('layouts.app')
 
-<head>
-  <meta charset="UTF-8">
-  <title>経費メニュー</title>
-  <style>
-    h1 {
-      margin-bottom: 1em;
-    }
-
-    ul {
-      list-style: none;
-      padding-left: 0;
-    }
-
-    li {
-      margin-bottom: 0.5em;
-    }
-
-    a {
-      font-size: 1.2em;
-    }
-  </style>
-</head>
-
-<body>
-  <h1>経費精算メニュー</h1>
-  <ul>
-    <li><a href="{{ route('business_trip_expenses.index') }}">出張旅費申請</a></li>
-    <li><a href="{{ route('supplies_expenses.index') }}">備品・消耗品費申請</a></li>
-    <li><a href="{{ route('entertainment_expenses.index') }}">接待交際費申請</a></li>
-    <li><a href="{{ route('transportation_expenses.index') }}">交通費申請</a></li>
+@section('content')
+<div class="p-4">
+  <h1 class="text-2xl font-bold mb-4">経費精算メニュー</h1>
+  <ul class="list-none pl-0">
+    <li class="mb-2"><a href="{{ route('business_trip_expenses.index') }}" class="text-blue-600 hover:underline">出張旅費申請</a></li>
+    <li class="mb-2"><a href="{{ route('supplies_expenses.index') }}" class="text-blue-600 hover:underline">備品・消耗品費申請</a></li>
+    <li class="mb-2"><a href="{{ route('entertainment_expenses.index') }}" class="text-blue-600 hover:underline">接待交際費申請</a></li>
+    <li class="mb-2"><a href="{{ route('transportation_expenses.index') }}" class="text-blue-600 hover:underline">交通費申請</a></li>
   </ul>
-</body>
-
-</html>
+</div>
+@endsection
