@@ -48,7 +48,17 @@ class EntertainmentExpenseController extends Controller
     // 一覧表示
     public function index()
     {
-        $entertainment_expenses = EntertainmentExpense::orderBy('entertainment_date', 'desc')->get();
+
+        /** @var \App\Models\User $user */
+        $user = auth()->user();
+        if ($user?->is_admin) {
+            // 管理者：全ユーザのデータを取得
+            $entertainment_expenses = EntertainmentExpense::with('user')->latest()->paginate(10);
+        } else {
+            // 一般ユーザ：自分のデータのみ
+            $entertainment_expenses = EntertainmentExpense::where('user_id', auth()->id())->latest()->paginate(10);
+        }
+
         return view('entertainment_expenses.index', compact('entertainment_expenses'));
     }
 

@@ -18,9 +18,16 @@
     <a href="{{ route('business_trip_expenses.create') }}" class="text-blue-600 hover:underline">＋ 新規申請</a>
   </div>
 
+  @if (auth()->user()->is_admin)
+  <p class="text-sm text-gray-500 mb-4">※ 管理者モード：全ユーザのデータを表示中</p>
+  @endif
+
   <table class="min-w-full bg-white border border-gray-300">
     <thead class="bg-gray-100">
       <tr>
+        @if (auth()->user()->is_admin)
+        <th class="px-4 py-2 border">ユーザ名</th>
+        @endif
         <th class="border px-4 py-2 text-left">日付</th>
         <th class="border px-4 py-2 text-left">出発地</th>
         <th class="border px-4 py-2 text-left">到着地</th>
@@ -34,6 +41,9 @@
     <tbody>
       @forelse ($business_trip_expenses as $expense)
       <tr>
+        @if (auth()->user()->is_admin)
+        <td class="px-4 py-2 border">{{ $expense->user->name ?? '-' }}</td>
+        @endif
         <td class="border px-4 py-2">{{ $expense->business_trip_date }}</td>
         <td class="border px-4 py-2">{{ $expense->departure }}</td>
         <td class="border px-4 py-2">{{ $expense->destination }}</td>

@@ -8,6 +8,7 @@ use App\Models\Expense;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 
+
 class SuppliesExpenseController extends Controller
 {
     //
@@ -53,12 +54,20 @@ class SuppliesExpenseController extends Controller
     // 一覧表示
     public function index()
     {
-        $expenses = SuppliesExpense::where('user_id', Auth::id())
-            ->orderBy('created_at', 'desc') // または 'asc'
-            ->get();
 
-        return view('supplies_expenses.index', compact('expenses'));
+        /** @var \App\Models\User $user */
+        $user = auth()->user();
+        if ($user?->is_admin) {
+            // 管理者：全ユーザのデータを取得
+            $suppliesExpenses = SuppliesExpense::with('user')->latest()->paginate(10);
+        } else {
+            // 一般ユーザ：自分のデータのみ
+            $suppliesExpenses = SuppliesExpense::where('user_id', auth()->id())->latest()->paginate(10);
+        }
+
+        return view('supplies_expenses.index', compact('suppliesExpenses'));
     }
+
 
     // 詳細表示
     public function show(SuppliesExpense $supplies_expense)

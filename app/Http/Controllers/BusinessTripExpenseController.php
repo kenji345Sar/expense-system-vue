@@ -52,7 +52,17 @@ class BusinessTripExpenseController extends Controller
     // 一覧表示
     public function index()
     {
-        $business_trip_expenses = BusinessTripExpense::orderBy('business_trip_date', 'desc')->get();
+
+        /** @var \App\Models\User $user */
+        $user = auth()->user();
+        if ($user?->is_admin) {
+            // 管理者：全ユーザのデータを取得
+            $business_trip_expenses = BusinessTripExpense::with('user')->latest()->paginate(10);
+        } else {
+            // 一般ユーザ：自分のデータのみ
+            $business_trip_expenses = BusinessTripExpense::where('user_id', auth()->id())->latest()->paginate(10);
+        }
+
         return view('business_trip_expenses.index', compact('business_trip_expenses'));
     }
     // 詳細表示
