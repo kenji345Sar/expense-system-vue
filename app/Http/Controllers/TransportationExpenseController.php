@@ -18,7 +18,15 @@ class TransportationExpenseController  extends Controller
 
     public function index()
     {
-        $items = TransportationExpense::orderBy('use_date', 'desc')->get();
+        /** @var \App\Models\User $user */
+        $user = auth()->user();
+        if ($user?->is_admin) {
+            // 管理者は全てのデータを取得
+            $items = TransportationExpense::orderBy('use_date', 'desc')->get();
+        } else {
+            // 一般ユーザーは自分のデータのみ取得
+            $items = TransportationExpense::where('user_id', $user->id)->orderBy('use_date', 'desc')->get();
+        }
         return view('transportation_expenses.index', compact('items'));
     }
 

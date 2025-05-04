@@ -16,4 +16,9 @@ class BusinessTripExpense extends Model
         'amount',
         'remarks',
     ];
+
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
 }

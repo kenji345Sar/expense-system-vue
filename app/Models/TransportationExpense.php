@@ -16,4 +16,8 @@ class TransportationExpense extends Model
         'remarks',
         'user_id',
     ];
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
 }
