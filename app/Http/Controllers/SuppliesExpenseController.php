@@ -21,6 +21,7 @@ class SuppliesExpenseController extends Controller
     // データ保存
     public function store(Request $request)
     {
+        dd(request()->all());
         $validated = $request->validate([
             'date' => 'required|date',
             'item_name' => 'required|string|max:255',
@@ -54,7 +55,7 @@ class SuppliesExpenseController extends Controller
     // 一覧表示
     public function index()
     {
-
+        // dd(request()->all());
         /** @var \App\Models\User $user */
         $user = auth()->user();
         if ($user?->is_admin) {

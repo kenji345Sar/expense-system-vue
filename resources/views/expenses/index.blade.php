@@ -8,6 +8,9 @@
     <li class="mb-2"><a href="{{ route('supplies_expenses.index') }}" class="text-blue-600 hover:underline">備品・消耗品費申請</a></li>
     <li class="mb-2"><a href="{{ route('entertainment_expenses.index') }}" class="text-blue-600 hover:underline">接待交際費申請</a></li>
     <li class="mb-2"><a href="{{ route('transportation_expenses.index') }}" class="text-blue-600 hover:underline">交通費申請</a></li>
+    <li class="mb-2">
+      <a href="{{ route('expenses.index') }}" class="text-blue-500">申請一覧（ステータス付き）</a>
+    </li>
   </ul>
 </div>
 @endsection
