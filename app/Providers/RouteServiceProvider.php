@@ -10,7 +10,7 @@ class RouteServiceProvider extends ServiceProvider
   /**
    * ログイン後のリダイレクト先
    */
-  public const HOME = '/expenses';
+  public const HOME = '/expenses/menu';
 
   /**
    * Define your route model bindings, pattern filters, etc.

@@ -1,82 +1,48 @@
-# expense-system（経費精算システム）
+# 経費精算システム（expense-system）
 
-このプロジェクトは Laravel を使った経費精算管理システムです。  
-備品・交通費・接待交際費・出張旅費などの申請を登録・編集・一覧・削除できる機能を持ちます。
-
----
-
-## 主な機能
-
-### 1. 経費申請機能
-
-各モジュール（交通費・備品・出張・接待）に応じた入力画面から、日付・金額・品目などを入力し、登録が可能です。
-
--   一般ユーザは自分の申請だけを閲覧・編集・削除可能
--   登録データは一覧表示され、ページネーション付きで確認できます
-
-### 2. 管理者モード
-
-ログインユーザが管理者の場合、全ユーザの申請データが一覧表示されます。
-
--   各申請にユーザ名が表示される
--   管理者専用の注意書きが表示される（「管理者モード：全ユーザのデータを表示中」など）
-
-### 3. 認証機能
-
-Laravel Breeze により、ログイン／ログアウト／ユーザ登録／パスワードリセットが可能です。
-
--   認証後のみ経費申請が利用可能
+このプロジェクトは Laravel を使った社内向け経費精算アプリケーションです。  
+現在、**「出張旅費伝票モジュール」のみ完成済み**です（他のモジュールはリファクタリング中）。
 
 ---
 
-## 権限制御（is_admin）
+## ✅ 対応済み機能（出張旅費）
 
--   `users` テーブルに `is_admin` カラムを追加し、管理者フラグを制御
--   管理者ユーザは全ユーザの申請データを参照可能
--   一般ユーザは自分が登録した申請データのみ表示
--   管理者ユーザは Tinker 経由で作成可能
+- ログイン／ログアウト機能（Laravel Breeze 使用）
+- 出張旅費の申請（複数明細入力対応）
+- 申請一覧／編集／削除
+- ログインユーザー別に申請データを管理
+- 管理者による全ユーザーの申請閲覧（is_admin フラグ対応）
+
+---
+
+## 📝 設計資料（docsフォルダ）
+
+- 画面遷移図、ルーティング定義、ER図 などを Markdown でまとめています  
+→ `docs/` フォルダをご覧ください
+
+---
+
+## ⚙️ 技術構成
+
+- Laravel 10.x / PHP 8.x
+- MySQL 8.x
+- Docker（Laravel Sail 非使用）
+- Blade（Tailwind CSS）
+- Laravel Breeze（認証）
+- Git / GitHub
+
+---
+
+## 📦 セットアップ手順（Dockerベース）
+
+### 1. リポジトリのクローン
 
 ```bash
-php artisan tinker
-
->>> \App\Models\User::create([
-  'name' => '管理者ユーザ',
-  'email' => 'admin@example.com',
-  'password' => bcrypt('password'),
-  'is_admin' => true
-]);
-```
-
----
-
-## 構成技術
-
--   Laravel 10.x
--   MySQL 8.x
--   Redis
-
-※ Laravel Sail は使用しておらず、`docker-compose` による構成で動作しています。
-
----
-
-## 必要な環境
-
--   Docker / Docker Compose
--   Git
--   ブラウザ（Chrome 等）
-
----
-
-## セットアップ手順
-
-### 1. リポジトリをクローン
-
-```bash
-git clone https://github.com/kenji345Sar/expense-system.git
+git clone https://github.com/xxxxx/expense-system.git
 cd expense-system
 ```
 
-### 2. `.env` 作成と依存パッケージのインストール
+### 2. `.env` の作成とビルド
 
 ```bash
 cp .env.example .env
@@ -85,70 +51,88 @@ docker-compose exec laravel.test composer install
 docker-compose exec laravel.test php artisan key:generate
 ```
 
-### 3. 初期データのインポート（dump.sql を利用）
+### 3. DBの初期化とマイグレーション
 
 ```bash
-# dump.sql をコンテナにコピー
+docker-compose exec laravel.test php artisan migrate --seed
+```
+
+もしくは `dump.sql` を利用して初期化：
+
+```bash
 docker cp dump.sql expense-system-mysql-1:/dump.sql
-
-# コンテナに入る
 docker exec -it expense-system-mysql-1 bash
-
-# インポート実行
 mysql -u root -p laravel < /dump.sql
 ```
 
-※パスワードは `.env` に記載されている値を使用してください。
-
 ---
 
-## 認証機能について
-
-Laravel Breeze（Blade 版）を使用して認証機能を導入しています。
+## 🔐 管理者ユーザー作成（Tinker）
 
 ```bash
-composer require laravel/breeze --dev
-php artisan breeze:install
-npm install && npm run build
-php artisan migrate
-```
+php artisan tinker
 
-ログイン後、各種申請機能（備品・消耗品費など）を利用できます。  
-管理者ユーザを作成する場合は上記 Tinker コマンドを参考にしてください。
+>>> \App\Models\User::create([
+  'name' => '管理者',
+  'email' => 'admin@example.com',
+  'password' => bcrypt('password'),
+  'is_admin' => true
+]);
+```
 
 ---
 
-## 画面イメージ
+## 💡 今後の予定・開発中の機能
 
-※以下は仮のパスです。実際には `public/images/` 配下などに保存し、画像と一緒に使用してください。
+- 他モジュール（交通費／接待交際費／備品費）対応中
+- コンポーネント化（form inputなど）とUI統一の検討
+- Alpine.js → Vue3 への移行構想
+- AWS へのデプロイ（検証予定）
 
-### ログイン画面
+---
+
+## 🖼️ 画面キャプチャ（例：出張旅費一覧）
+
+## 🖼️ 画面キャプチャ
+
+### 🔐 ログイン画面
+ログインユーザーのみが申請操作可能です（Laravel Breezeによる認証機能）。
 
 ![ログイン画面](public/images/login.png)
 
-### 備品・消耗品費一覧画面（一般ユーザ）
+---
 
-![備品一覧](public/images/supplies_index.png)
-
-### 交通費一覧画面（一般ユーザ）
-
-![交通費一覧](public/images/transportation_index.png)
-
-### 接待交際費一覧画面（一般ユーザ）
-
-![接待交際費一覧](public/images/entertainment_index.png)
-
-### 出張旅費一覧画面（一般ユーザ）
+### 📋 出張旅費一覧画面
+自分が申請した出張旅費伝票が一覧表示されます。
 
 ![出張旅費一覧](public/images/business_trip_index.png)
 
-### 管理者モード画面
+---
 
-![管理者モード](public/images/admin_view.png)
+### 🆕 出張旅費新規登録画面
+明細（出張日、出発地、目的地、目的、金額など）を複数入力できます。  
+合計金額は自動的に計算されます。
+
+![出張旅費新規登録](public/images/business_trip_add.png)
 
 ---
 
-## 備考
+### ✏️ 出張旅費編集画面
+既存の出張伝票内容を修正できます。明細の複数行にも対応。
 
--   `storage/` や `vendor/` ディレクトリは `.gitignore` により Git 管理外です。
--   `meilisearch` や `mailpit` などのサービスは使用していません（docker-compose.yml 上でも除外済み）。
+![出張旅費編集](public/images/business_trip_edit.png)
+
+
+---
+
+## 📁 補足
+
+- `.gitignore` により `storage/`, `vendor/` などは Git 管理外です
+- メール／検索などの外部連携機能は未導入です
+
+---
+
+## 👨‍💻 作者メモ
+
+本リポジトリは現在も開発中です。  
+途中状態ではありますが、「出張旅費モジュール」を一区切りとして公開しています。

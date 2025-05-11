@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use App\Models\Transportation;
 
 class Expense extends Model
 {
@@ -15,6 +16,7 @@ class Expense extends Model
         'amount',
         'description',
         'expense_type',
+        'note',
         'status',
         'transportation_expense_id',
         'approver_id',
@@ -31,11 +33,17 @@ class Expense extends Model
     // 交通費とのリレーション（交通費）
     public function transportationExpenses()
     {
-        return $this->hasMany(TransportationExpense::class);
+        return $this->hasMany(Transportation::class);
     }
-    // 例: public function businessTripExpense() { return $this->hasOne(BusinessTripExpense::class); }
+    public function businessTripExpenses()
+    {
+        return $this->hasMany(BusinessTrip::class);
+    }
     // 例: public function entertainmentExpense() { return $this->hasOne(EntertainmentExpense::class); }
-    // 例: public function suppliesExpense() { return $this->hasOne(SuppliesExpense::class); }
+    public function supplyExpenses()
+    {
+        return $this->hasMany(Supply::class);
+    }
     // 承認者とのリレーション（承認者）
     public function approver()
     {
