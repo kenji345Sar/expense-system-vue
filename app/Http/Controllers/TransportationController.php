@@ -51,11 +51,14 @@ class TransportationController  extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'transportation.*.use_date'   => 'required|date',
-            'transportation.*.departure'  => 'required|string',
-            'transportation.*.arrival'    => 'required|string',
-            'transportation.*.route'      => 'required|string',
-            'transportation.*.amount'     => 'required|numeric',
+            'description' => 'nullable|string|max:255',
+            'transportation_expenses' => 'required|array|min:1',
+            'transportation_expenses.*.use_date' => 'required|date',
+            'transportation_expenses.*.departure' => 'required|string|max:100',
+            'transportation_expenses.*.arrival' => 'required|string|max:100',
+            'transportation_expenses.*.route' => 'nullable|string|max:255',
+            'transportation_expenses.*.amount' => 'required|numeric|min:0',
+            'transportation_expenses.*.remarks' => 'nullable|string|max:255',
         ]);
 
         DB::transaction(function () use ($request, $validated) {
@@ -74,7 +77,7 @@ class TransportationController  extends Controller
             ]);
             // ② 明細を登録して紐づけ、合計金額も計算
             foreach ($request->input('transportation_expenses') as $index => $data) {
-                TransportationExpense::create([
+                Transportation::create([
                     'user_id'       => $userId,
                     'expense_id'    => $expense->id,
                     'display_order' => $index,
@@ -87,13 +90,12 @@ class TransportationController  extends Controller
                 ]);
 
                 $totalAmount += $data['amount'];
-                $descriptions[] = $data['route'];
             }
 
             // ③ Expense を更新（合計金額・概要）
             $expense->update([
                 'amount'      => $totalAmount,
-                'description' => implode(' / ', $descriptions),
+                'description' => $request->description,
             ]);
         });
 
@@ -107,32 +109,53 @@ class TransportationController  extends Controller
 
     public function edit($id)
     {
-        $expense = Expense::with('transportationExpenses')->findOrFail($id);
-        return view('transportation.edit', compact('expense'));
+        $transportation = Expense::with('transportationExpenses')->findOrFail($id);
+        return view('transportation.edit', compact('transportation'));
     }
 
 
     public function update(Request $request, $id)
     {
         $validated = $request->validate([
-            'use_date' => 'required|date',
-            'departure' => 'required|string',
-            'arrival' => 'required|string',
-            'route' => 'required|string',
-            'amount' => 'required|numeric',
+            'description' => 'nullable|string|max:255',
+            'transportation_expenses' => 'required|array|min:1',
+            'transportation_expenses.*.use_date' => 'required|date',
+            'transportation_expenses.*.departure' => 'required|string|max:100',
+            'transportation_expenses.*.arrival' => 'required|string|max:100',
+            'transportation_expenses.*.route' => 'nullable|string|max:255',
+            'transportation_expenses.*.amount' => 'required|numeric|min:0',
+            'transportation_expenses.*.remarks' => 'nullable|string|max:255',
         ]);
 
-        DB::transaction(function () use ($validated, $id) {
-            $transport = TransportationExpense::findOrFail($id);
-            $transport->update($validated);
+        DB::transaction(function () use ($validated, $id, $request) {
 
-            // Expense テーブルを transportation_expense_id で更新
-            Expense::where('transportation_expense_id', $transport->id)
-                ->update([
-                    'date'        => $transport->use_date,
-                    'amount'      => $transport->amount,
-                    'description' => $transport->route,
+            // Expense を取得
+            $expense = Expense::with('transportationExpenses')->findOrFail($id);
+
+            // 明細を一旦削除
+            Transportation::where('expense_id', $id)->delete();
+
+            // 明細を再挿入
+            foreach ($validated['transportation_expenses'] as $index => $row) {
+                Transportation::create([
+                    'expense_id'         => $id,
+                    'user_id'            => auth()->id(),
+                    'display_order'      => $index,
+                    'use_date' => $row['use_date'],
+                    'departure'          => $row['departure'],
+                    'arrival'        => $row['arrival'],
+                    'route'            => $row['route'],
+                    'amount'             => $row['amount'],
+                    'remarks'            => $row['remarks'] ?? null,
                 ]);
+            }
+
+            // 合計金額と申請メモ（description）を更新
+            $totalAmount = Transportation::where('expense_id', $id)->sum('amount');
+            $expense->update([
+                'amount'      => $totalAmount,
+                'description' => $request->description,
+            ]);
         });
 
         return redirect()

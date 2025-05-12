@@ -1,39 +1,28 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="container">
-    <h1>交通費申請 編集</h1>
+<div class="max-w-4xl mx-auto py-8">
+    <h2 class="text-2xl font-bold mb-6">交通費 編集フォーム</h2>
 
-    <form action="{{ route('expenses.update', $expense->id) }}" method="POST">
+    <form method="POST" action="{{ route('transportation.update', $transportation->id) }}">
         @csrf
         @method('PUT')
 
-        <div id="details" x-data="{ rows: @json($expense->transportationExpenses) }">
-            <template x-for="(row, index) in rows" :key="index">
-                <div class="border p-4 mb-4 rounded">
-                    <input type="hidden" :name="'transportation_expenses[' + index + '][id]'" x-bind:value="row.id">
-                    <label>利用日</label>
-                    <input type="date" :name="'transportation_expenses[' + index + '][use_date]'" x-bind:value="row.use_date">
-                    <label>出発地</label>
-                    <input type="text" :name="'transportation_expenses[' + index + '][departure]'" x-bind:value="row.departure">
-                    <label>到着地</label>
-                    <input type="text" :name="'transportation_expenses[' + index + '][arrival]'" x-bind:value="row.arrival">
-                    <label>経路</label>
-                    <input type="text" :name="'transportation_expenses[' + index + '][route]'" x-bind:value="row.route">
-                    <label>金額</label>
-                    <input type="number" :name="'transportation_expenses[' + index + '][amount]'" x-bind:value="row.amount">
-                </div>
-            </template>
+        <div class="mb-4">
+            <label for="description" class="block font-semibold mb-1">申請メモ（任意）</label>
+            <textarea id="description" name="description" class="w-full border rounded p-2">{{ old('description', $transportation->description) }}</textarea>
         </div>
 
-        <button type="submit" class="btn btn-primary">更新</button>
-        <div class="flex gap-4 mt-6">
-            <button type="submit" class="bg-green-500 text-white px-4 py-2 rounded hover:bg-blue-600">
-                更新する
-            </button>
-            <a href="{{ url()->previous() }}" class="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600">
-                戻る
-            </a>
+        {{-- Vueマウントポイント --}}
+        <div id="app">
+            <expense-form
+                type="transportation"
+                :initial-items='@json($transportation->transportationExpenses)'></expense-form>
+        </div>
+
+        <div class="mt-6">
+            <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded">更新</button>
+            <a href="{{ route('transportation.index') }}" class="ml-4 text-gray-600 hover:underline">戻る</a>
         </div>
     </form>
 </div>
