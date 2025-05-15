@@ -19,24 +19,48 @@ class EntertainmentController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'entertainment_date' => 'required|date',
-            'client_name' => 'required|string',
-            'place' => 'required|string',
-            'amount' => 'required|numeric',
-            'description' => 'nullable|string',
+            'description' => 'nullable|string|max:255',
+            'entertainment_expenses' => 'required|array|min:1',
+            'entertainment_expenses.*.entertainment_date' => 'required|date',
+            'entertainment_expenses.*.client_name' => 'required|string|max:100',
+            'entertainment_expenses.*.place' => 'required|string|max:100',
+            'entertainment_expenses.*.content' => 'nullable|string|max:255',
+            'entertainment_expenses.*.amount' => 'required|numeric|min:0',
         ]);
 
-        DB::transaction(function () use ($validated) {
-            $entertainment = Entertainment::create(array_merge($validated, [
-                'user_id' => 1, // ログイン未実装なら固定値
-            ]));
+        DB::transaction(function () use ($request, $validated) {
+            $userId = auth()->id();
+            $totalAmount = 0;
 
-            Expense::create([
-                'user_id' => 1,
-                'date' => $entertainment->entertainment_date,
-                'amount' => $entertainment->amount,
-                'description' => $entertainment->place,
+            // ① Expenseを先に作る（明細を紐づけるための伝票ID）
+            $expense = Expense::create([
+                'user_id'      => $userId,
+                'date'         => now(),
+                'amount'       => 0,       // 後で更新
+                'description'  => '',      // 後で更新
                 'expense_type' => 'entertainment',
+                'status'       => 'draft',
+            ]);
+            // ② 明細を登録して紐づけ、合計金額も計算
+            foreach ($request->input('entertainment_expenses') as $index => $data) {
+                Entertainment::create([
+                    'user_id'       => $userId,
+                    'expense_id'    => $expense->id,
+                    'display_order' => $index,
+                    'entertainment_date'      => $data['entertainment_date'],
+                    'client_name'     => $data['client_name'],
+                    'place'       => $data['place'],
+                    'content'         => $data['content'],
+                    'amount'        => $data['amount'],
+                ]);
+
+                $totalAmount += $data['amount'];
+            }
+
+            // ③ Expense を更新（合計金額・概要）
+            $expense->update([
+                'amount'      => $totalAmount,
+                'description' => $request->description,
             ]);
         });
 
@@ -49,17 +73,24 @@ class EntertainmentController extends Controller
     public function index()
     {
 
-        /** @var \App\Models\User $user */
         $user = auth()->user();
+
         if ($user?->is_admin) {
-            // 管理者：全ユーザのデータを取得
-            $entertainment = Entertainment::with('user')->latest()->paginate(10);
+            // 管理者：全ユーザー分の交通費申請
+            $entertainment_expenses = Expense::with('entertainmentExpenses', 'user')
+                ->where('expense_type', 'entertainment') // transportation固定
+                ->orderBy('id', 'desc')
+                ->get();
         } else {
-            // 一般ユーザ：自分のデータのみ
-            $entertainment = Entertainment::where('user_id', auth()->id())->latest()->paginate(10);
+            // 一般ユーザ：自分の申請のみ
+            $entertainment_expenses = Expense::with('entertainmentExpenses')
+                ->where('user_id', $user->id)
+                ->where('expense_type', 'entertainment')
+                ->orderBy('id', 'desc')
+                ->get();
         }
 
-        return view('entertainment.index', compact('entertainment'));
+        return view('entertainment.index', compact('entertainment_expenses'));
     }
 
     // 詳細表示
@@ -72,25 +103,57 @@ class EntertainmentController extends Controller
     // 編集画面表示
     public function edit($id)
     {
-        $entertainment_expense = Entertainment::findOrFail($id);
-        return view('entertainment.edit', compact('entertainment_expense'));
+
+        $entertainment = Expense::with('entertainmentExpenses')->findOrFail($id);
+        return view('entertainment.edit', compact('entertainment'));
     }
 
     // 更新処理
     public function update(Request $request, $id)
     {
         $validated = $request->validate([
-            'entertainment_date' => 'required|date',
-            'client_name' => 'required|string|max:255',
-            'place' => 'required|string|max:255',
-            'amount' => 'required|integer',
-            'content' => 'nullable|string',
+            'description' => 'nullable|string|max:255',
+            'entertainment_expenses' => 'required|array|min:1',
+            'entertainment_expenses.*.entertainment_date' => 'required|date',
+            'entertainment_expenses.*.client_name' => 'required|string|max:100',
+            'entertainment_expenses.*.place' => 'required|string|max:100',
+            'entertainment_expenses.*.content' => 'nullable|string|max:255',
+            'entertainment_expenses.*.amount' => 'required|numeric|min:0',
         ]);
 
-        $item  = Entertainment::findOrFail($id);
-        $item->update($validated);
+        DB::transaction(function () use ($validated, $id, $request) {
 
-        return redirect()->route('entertainment.index')
+            // Expense を取得
+            $expense = Expense::with('entertainmentExpenses')->findOrFail($id);
+
+            // 明細を一旦削除
+            Entertainment::where('expense_id', $id)->delete();
+
+            // 明細を再挿入
+            foreach ($validated['entertainment_expenses'] as $index => $row) {
+                Entertainment::create([
+                    'expense_id'         => $id,
+                    'user_id'            => auth()->id(),
+                    'display_order'      => $index,
+                    'entertainment_date' => $row['entertainment_date'],
+                    'client_name'          => $row['client_name'],
+                    'place'        => $row['place'],
+                    'content'            => $row['content'],
+                    'amount'             => $row['amount'],
+
+                ]);
+            }
+
+            // 合計金額と申請メモ（description）を更新
+            $totalAmount = Entertainment::where('expense_id', $id)->sum('amount');
+            $expense->update([
+                'amount'      => $totalAmount,
+                'description' => $request->description,
+            ]);
+        });
+
+        return redirect()
+            ->route('transportation.index')
             ->with('success', '更新が完了しました！');
     }
     // 削除処理

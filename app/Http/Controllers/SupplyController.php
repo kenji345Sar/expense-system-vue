@@ -22,13 +22,13 @@ class SupplyController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'supplies' => 'required|array|min:1',
-            'supplies.*.supply_date' => 'required|date',
-            'supplies.*.item_name' => 'required|string|max:255',
-            'supplies.*.quantity' => 'required|integer',
-            'supplies.*.unit_price' => 'required|integer',
-            'supplies.*.total_price' => 'required|integer',
-            'supplies.*.remarks' => 'nullable|string',
+            'supplies_expenses' => 'required|array|min:1',
+            'supplies_expenses.*.supply_date' => 'required|date',
+            'supplies_expenses.*.item_name' => 'required|string|max:255',
+            'supplies_expenses.*.quantity' => 'required|integer',
+            'supplies_expenses.*.unit_price' => 'required|integer',
+            'supplies_expenses.*.total_price' => 'required|integer',
+            'supplies_expenses.*.remarks' => 'nullable|string',
         ]);
 
         DB::transaction(function () use ($validated, $request) {
@@ -46,7 +46,7 @@ class SupplyController extends Controller
             ]);
 
             // SupplyExpenses（明細）を登録
-            foreach ($request->input('supplies') as $index => $data) {
+            foreach ($request->input('supplies_expenses') as $index => $data) {
                 Supply::create([
                     'user_id'     => $userId,
                     'expense_id'  => $expense->id,
@@ -80,20 +80,19 @@ class SupplyController extends Controller
 
         if ($user?->is_admin) {
             // 管理者：全ユーザー分の交通費申請
-            $supply_expenses = Expense::with('supplyExpenses', 'user')
+            $supplies_expenses = Expense::with('supplyExpenses', 'user')
                 ->where('expense_type', 'supplies') // transportation固定
                 ->orderBy('id', 'desc')
                 ->get();
         } else {
             // 一般ユーザ：自分の申請のみ
-            $supply_expenses = Expense::with('supplyExpense')
+            $supplies_expenses = Expense::with('supplyExpenses')
                 ->where('user_id', $user->id)
                 ->where('expense_type', 'supplies')
                 ->orderBy('id', 'desc')
                 ->get();
         }
-
-        return view('supplies.index', compact('supply_expenses'));
+        return view('supplies.index', compact('supplies_expenses'));
     }
 
 
@@ -108,6 +107,9 @@ class SupplyController extends Controller
     // 編集画面表示
     public function edit($supplies_expense)
     {
+        // 交通費申請の詳細を取得
+        $supplies_expense = Expense::with('supplyExpenses')->findOrFail($supplies_expense);
+
         return view('supplies.edit', compact('supplies_expense'));
     }
 
@@ -115,28 +117,43 @@ class SupplyController extends Controller
     public function update(Request $request, $id)
     {
         $validated = $request->validate([
-            'date' => 'required|date',
-            'item_name' => 'required|string|max:255',
-            'quantity' => 'required|integer',
-            'unit_price' => 'required|integer',
-            'total_price' => 'required|integer',
-            'remarks' => 'nullable|string',
+            'supplies_expenses' => 'required|array|min:1',
+            'supplies_expenses.*.supply_date' => 'required|date',
+            'supplies_expenses.*.item_name' => 'required|string|max:255',
+            'supplies_expenses.*.quantity' => 'required|integer',
+            'supplies_expenses.*.unit_price' => 'required|integer',
+            'supplies_expenses.*.total_price' => 'required|integer',
+            'supplies_expenses.*.remarks' => 'nullable|string',
         ]);
 
-        DB::transaction(function () use ($validated, $id) {
-            $supplies = Supply::findOrFail($id);
-            $supplies->update($validated);
+        DB::transaction(function () use ($validated, $id, $request) {
 
-            // 対応する expense レコードを更新（expense_type: supplies）
-            Expense::where([
-                ['expense_type', 'supplies'],
-                ['user_id', $supplies->user_id],
-                ['date', $supplies->date],
-                ['description', $supplies->item_name],
-            ])->latest()->first()?->update([
-                'date' => $supplies->date,
-                'amount' => $supplies->total_price,
-                'description' => $supplies->item_name,
+            // Expense を取得
+            $expense = Expense::with('supplyExpenses')->findOrFail($id);
+
+            // 明細を一旦削除
+            Supply::where('expense_id', $id)->delete();
+
+            // 明細を再挿入
+            foreach ($validated['supplies_expenses'] as $index => $row) {
+                Supply::create([
+                    'expense_id'         => $id,
+                    'user_id'            => auth()->id(),
+                    'display_order'      => $index,
+                    'supply_date' => $row['supply_date'],
+                    'item_name'   => $row['item_name'],
+                    'quantity'    => $row['quantity'],
+                    'unit_price'  => $row['unit_price'],
+                    'total_price' => $row['total_price'],
+                    'remarks'     => $row['remarks'] ?? null,
+                ]);
+            }
+
+            // 合計金額と申請メモ（description）を更新
+            $totalAmount = Supply::where('expense_id', $id)->sum('total_price');
+            $expense->update([
+                'amount'      => $totalAmount,
+                'description' => $request->description,
             ]);
         });
 

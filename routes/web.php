@@ -4,6 +4,9 @@ use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\BusinessTripController;
 use App\Http\Controllers\TransportationController;
+use App\Http\Controllers\Auth\AuthenticatedSessionController;
+use App\Http\Controllers\EntertainmentController;
+use App\Http\Controllers\SupplyController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -17,16 +20,25 @@ Route::middleware(['auth'])->group(function () {
         ->names('business_trip');
     Route::resource('expenses/transportation', TransportationController::class)
         ->names('transportation');
+    Route::resource('expenses/supply', SupplyController::class)
+        ->names('supplies');
+    Route::resource('expenses/entertainment', EntertainmentController::class)
+        ->names('entertainment');
 });
 
 // 以下は未実装のルートに対するダミー
 // Route::get('/expenses/business_trip', fn() => 'dummy business_trip')->name('business_trip.index');
 Route::get('/expenses/business_trip/submit', fn() => 'dummy business_trip')->name('business_trip.submit');
 Route::get('/expenses/transportation/submit', fn() => 'dummy transportation')->name('transportation.submit');
+Route::get('/expenses/supply/submit', fn() => 'dummy transportation')->name('supplies.submit');
+Route::get('/expenses/entertainment/submit', fn() => 'dummy entertainment')->name('entertainment.submit');
 
 
-Route::get('/expenses/supplies', fn() => 'dummy supplies')->name('supplies.index');
-Route::get('/expenses/entertainment', fn() => 'dummy entertainment')->name('entertainment.index');
+
+
+
+// Route::get('/expenses/supplies', fn() => 'dummy supplies')->name('supplies.index');
+// Route::get('/expenses/entertainment', fn() => 'dummy entertainment')->name('entertainment.index');
 // Route::get('/expenses/transportation', fn() => 'dummy transportation')->name('transportation.index');
 Route::get('/expenses', fn() => 'dummy expenses')->name('expenses.index');
 

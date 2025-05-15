@@ -39,7 +39,10 @@ class Expense extends Model
     {
         return $this->hasMany(BusinessTrip::class);
     }
-    // 例: public function entertainmentExpense() { return $this->hasOne(EntertainmentExpense::class); }
+    public function entertainmentExpenses()
+    {
+        return $this->hasMany(Entertainment::class);
+    }
     public function supplyExpenses()
     {
         return $this->hasMany(Supply::class);

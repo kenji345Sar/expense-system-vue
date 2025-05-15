@@ -8,7 +8,8 @@
 <script>
 import BusinessTripForm from './BusinessTripForm.vue'
 import TransportationForm from './TransportationForm.vue'
-// 今後追加予定：import SuppliesForm from './SuppliesForm.vue'
+import SuppliesForm from './SuppliesForm.vue'
+import EntertainmentForm from './EntertainmentForm.vue'
 
 export default {
   props: {
@@ -26,8 +27,8 @@ export default {
       return {
         business_trip: BusinessTripForm,
         transportation: TransportationForm,
-        // supplies: SuppliesForm,
-        // entertainment: EntertainmentForm
+        supplies: SuppliesForm,
+        entertainment: EntertainmentForm
       }[this.type]
     }
   }

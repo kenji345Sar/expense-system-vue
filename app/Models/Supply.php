@@ -16,6 +16,7 @@ class Supply extends Model
         'unit_price',
         'total_price',
         'remarks',
+        'expense_id',
         'user_id',
     ];
 

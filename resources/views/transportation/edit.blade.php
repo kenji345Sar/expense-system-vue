@@ -12,7 +12,6 @@
             <label for="description" class="block font-semibold mb-1">申請メモ（任意）</label>
             <textarea id="description" name="description" class="w-full border rounded p-2">{{ old('description', $transportation->description) }}</textarea>
         </div>
-
         {{-- Vueマウントポイント --}}
         <div id="app">
             <expense-form

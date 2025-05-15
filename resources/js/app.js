@@ -10,8 +10,11 @@ import { createApp } from 'vue';
 import BusinessTripForm from './components/BusinessTripForm.vue';
 import BusinessTripEditForm from './components/BusinessTripEditForm.vue'
 import TransportationForm from './components/TransportationForm.vue'
-import ExpenseForm from './components/ExpenseForm.vue'
-import FormRow from './components/FormRow.vue'
+import ExpenseForm from './components/ExpenseForm.vue';
+import FormRow from './components/FormRow.vue';
+import EntertainmentForm from './components/EntertainmentForm.vue';
+import SuppliesForm from './components/SuppliesForm.vue';
+
 
 
 
@@ -20,9 +23,9 @@ app.component('business-trip-form', BusinessTripForm);
 app.component('business-trip-edit-form', BusinessTripEditForm);
 app.component('transportation-form', TransportationForm);
 app.component('expense-form', ExpenseForm);
-app.component('form-row', FormRow)
-
-
+app.component('form-row', FormRow);
+app.component('supply-form', SuppliesForm);
+app.component('entertainment-form', EntertainmentForm);
 
 
 app.mount('#app');
