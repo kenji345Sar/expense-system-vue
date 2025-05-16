@@ -7,6 +7,7 @@ use App\Models\Transportation;
 use Illuminate\Http\Request;
 use App\Models\Expense;
 use Illuminate\Support\Facades\DB;
+use App\Services\ExpenseListService;
 
 class TransportationController  extends Controller
 {
@@ -16,28 +17,41 @@ class TransportationController  extends Controller
     }
 
 
-    public function index()
+    // public function index()
+    // {
+    //     $user = auth()->user();
+
+    //     if ($user?->is_admin) {
+    //         // 管理者：全ユーザー分の交通費申請
+    //         $expenses = Expense::with('transportationExpenses', 'user')
+    //             ->where('expense_type', 'transportation') // transportation固定
+    //             ->orderBy('id', 'desc')
+    //             ->get();
+    //     } else {
+    //         // 一般ユーザ：自分の申請のみ
+    //         $expenses = Expense::with('transportationExpenses')
+    //             ->where('user_id', $user->id)
+    //             ->where('expense_type', 'transportation')
+    //             ->orderBy('id', 'desc')
+    //             ->get();
+    //     }
+
+    //     return view('transportation.index', compact('expenses'));
+    // }
+
+    public function index(ExpenseListService $service)
     {
-        $user = auth()->user();
-
-        if ($user?->is_admin) {
-            // 管理者：全ユーザー分の交通費申請
-            $expenses = Expense::with('transportationExpenses', 'user')
-                ->where('expense_type', 'transportation') // transportation固定
-                ->orderBy('id', 'desc')
-                ->get();
-        } else {
-            // 一般ユーザ：自分の申請のみ
-            $expenses = Expense::with('transportationExpenses')
-                ->where('user_id', $user->id)
-                ->where('expense_type', 'transportation')
-                ->orderBy('id', 'desc')
-                ->get();
-        }
-
-        return view('transportation.index', compact('expenses'));
+        $type = 'transportation';
+        $expenses = $service->getExpenseList($type, auth()->user());
+        $headers = config("expense_headers.$type");
+        $relation = match ($type) {
+            'transportation' => 'transportationExpenses',
+            'supplies' => 'suppliesExpenses',
+            'business_trip' => 'businessTripExpenses',
+            'entertainment' => 'entertainmentExpenses',
+        };
+        return view('expenses.index', compact('expenses', 'headers', 'type', 'relation'));
     }
-
 
 
 

@@ -35,7 +35,10 @@ Route::get('/expenses/entertainment/submit', fn() => 'dummy entertainment')->nam
 
 
 
-
+Route::get('/expenses/business_trip/apply', fn() => 'dummy business_trip')->name('business_trip.apply');
+Route::get('/expenses/transportation/apply', fn() => 'dummy transportation')->name('transportation.apply');
+Route::get('/expenses/supply/apply', fn() => 'dummy transportation')->name('supplies.apply');
+Route::get('/expenses/entertainment/apply', fn() => 'dummy entertainment')->name('entertainment.apply');
 
 // Route::get('/expenses/supplies', fn() => 'dummy supplies')->name('supplies.index');
 // Route::get('/expenses/entertainment', fn() => 'dummy entertainment')->name('entertainment.index');
