@@ -6,6 +6,9 @@ use Illuminate\Http\Request;
 use App\Models\BusinessTrip;
 use App\Models\Expense;
 use Illuminate\Support\Facades\DB;
+use App\Services\ExpenseListService;
+use Illuminate\Support\Facades\Log;
+use App\Helpers\ExpenseTypeRelationMap;
 
 class BusinessTripController extends Controller
 {
@@ -78,33 +81,46 @@ class BusinessTripController extends Controller
 
     // 一覧表示
 
-    public function index()
+    // public function index()
+    // {
+    //     $user = auth()->user();
+
+    //     if ($user?->is_admin) {
+    //         // 管理者：全ユーザー分の交通費申請
+    //         $business_trip_expenses = Expense::with('businessTripExpenses', 'user')
+    //             ->where('expense_type', 'business_trip') // transportation固定
+    //             ->orderBy('id', 'desc')
+    //             ->get();
+    //         // foreach ($business_trip_expenses as $expense) {
+    //         //     echo 'Expense ID: ' . $expense->id . PHP_EOL;
+    //         //     echo 'User Name: ' . $expense->user->name . PHP_EOL;
+    //         //     echo 'Business Trip Count: ' . count($expense->businessTripExpenses) . PHP_EOL;
+    //         // }
+    //         // dd($business_trip_expenses->toArray());
+    //     } else {
+    //         // 一般ユーザ：自分の申請のみ
+    //         $business_trip_expenses = Expense::with('businessTripExpenses')
+    //             ->where('user_id', $user->id)
+    //             ->where('expense_type', 'business_trip')
+    //             ->orderBy('id', 'desc')
+    //             ->get();
+    //     }
+
+    //     return view('business_trip.index', compact('business_trip_expenses'));
+    // }
+
+    public function index(ExpenseListService $service)
     {
-        $user = auth()->user();
+        $type = 'business_trip';
+        $expenses = $service->getExpenseList($type, auth()->user());
+        $headers = config("expense_headers.$type");
+        $relation = ExpenseTypeRelationMap::getRelationName($type);
 
-        if ($user?->is_admin) {
-            // 管理者：全ユーザー分の交通費申請
-            $business_trip_expenses = Expense::with('businessTripExpenses', 'user')
-                ->where('expense_type', 'business_trip') // transportation固定
-                ->orderBy('id', 'desc')
-                ->get();
-            // foreach ($business_trip_expenses as $expense) {
-            //     echo 'Expense ID: ' . $expense->id . PHP_EOL;
-            //     echo 'User Name: ' . $expense->user->name . PHP_EOL;
-            //     echo 'Business Trip Count: ' . count($expense->businessTripExpenses) . PHP_EOL;
-            // }
-            // dd($business_trip_expenses->toArray());
-        } else {
-            // 一般ユーザ：自分の申請のみ
-            $business_trip_expenses = Expense::with('businessTripExpenses')
-                ->where('user_id', $user->id)
-                ->where('expense_type', 'business_trip')
-                ->orderBy('id', 'desc')
-                ->get();
-        }
-
-        return view('business_trip.index', compact('business_trip_expenses'));
+        return view('expenses.index', compact('expenses', 'headers', 'type', 'relation'));
     }
+
+
+
 
     // 詳細表示
     public function show($id)

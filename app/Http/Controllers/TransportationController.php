@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use App\Models\Expense;
 use Illuminate\Support\Facades\DB;
 use App\Services\ExpenseListService;
+use App\Helpers\ExpenseTypeRelationMap;
 
 class TransportationController  extends Controller
 {
@@ -44,12 +45,8 @@ class TransportationController  extends Controller
         $type = 'transportation';
         $expenses = $service->getExpenseList($type, auth()->user());
         $headers = config("expense_headers.$type");
-        $relation = match ($type) {
-            'transportation' => 'transportationExpenses',
-            'supplies' => 'suppliesExpenses',
-            'business_trip' => 'businessTripExpenses',
-            'entertainment' => 'entertainmentExpenses',
-        };
+        $relation = ExpenseTypeRelationMap::getRelationName($type);
+
         return view('expenses.index', compact('expenses', 'headers', 'type', 'relation'));
     }
 

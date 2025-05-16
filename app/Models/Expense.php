@@ -43,7 +43,7 @@ class Expense extends Model
     {
         return $this->hasMany(Entertainment::class);
     }
-    public function supplyExpenses()
+    public function suppliesExpenses()
     {
         return $this->hasMany(Supply::class);
     }

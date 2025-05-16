@@ -6,6 +6,8 @@ use App\Models\Entertainment;
 use Illuminate\Http\Request;
 use App\Models\Expense;
 use Illuminate\Support\Facades\DB;
+use App\Services\ExpenseListService;
+use App\Helpers\ExpenseTypeRelationMap;
 
 class EntertainmentController extends Controller
 {
@@ -70,27 +72,37 @@ class EntertainmentController extends Controller
     }
 
     // 一覧表示
-    public function index()
+    // public function index()
+    // {
+
+    //     $user = auth()->user();
+
+    //     if ($user?->is_admin) {
+    //         // 管理者：全ユーザー分の交通費申請
+    //         $entertainment_expenses = Expense::with('entertainmentExpenses', 'user')
+    //             ->where('expense_type', 'entertainment') // transportation固定
+    //             ->orderBy('id', 'desc')
+    //             ->get();
+    //     } else {
+    //         // 一般ユーザ：自分の申請のみ
+    //         $entertainment_expenses = Expense::with('entertainmentExpenses')
+    //             ->where('user_id', $user->id)
+    //             ->where('expense_type', 'entertainment')
+    //             ->orderBy('id', 'desc')
+    //             ->get();
+    //     }
+
+    //     return view('entertainment.index', compact('entertainment_expenses'));
+    // }
+
+    public function index(ExpenseListService $service)
     {
+        $type = 'entertainment'; // 申請種別
+        $expenses = $service->getExpenseList($type, auth()->user());
+        $headers = config("expense_headers.$type");
+        $relation = ExpenseTypeRelationMap::getRelationName($type);
 
-        $user = auth()->user();
-
-        if ($user?->is_admin) {
-            // 管理者：全ユーザー分の交通費申請
-            $entertainment_expenses = Expense::with('entertainmentExpenses', 'user')
-                ->where('expense_type', 'entertainment') // transportation固定
-                ->orderBy('id', 'desc')
-                ->get();
-        } else {
-            // 一般ユーザ：自分の申請のみ
-            $entertainment_expenses = Expense::with('entertainmentExpenses')
-                ->where('user_id', $user->id)
-                ->where('expense_type', 'entertainment')
-                ->orderBy('id', 'desc')
-                ->get();
-        }
-
-        return view('entertainment.index', compact('entertainment_expenses'));
+        return view('expenses.index', compact('expenses', 'headers', 'type', 'relation'));
     }
 
     // 詳細表示

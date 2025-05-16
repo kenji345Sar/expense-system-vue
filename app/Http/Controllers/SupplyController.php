@@ -7,6 +7,8 @@ use App\Models\Supply;
 use App\Models\Expense;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
+use App\Services\ExpenseListService;
+use App\Helpers\ExpenseTypeRelationMap;
 
 
 class SupplyController extends Controller
@@ -73,26 +75,15 @@ class SupplyController extends Controller
             ->with('success', '登録が完了しました！');
     }
 
-    // 一覧表示
-    public function index()
-    {
-        $user = auth()->user();
 
-        if ($user?->is_admin) {
-            // 管理者：全ユーザー分の交通費申請
-            $supplies_expenses = Expense::with('supplyExpenses', 'user')
-                ->where('expense_type', 'supplies') // transportation固定
-                ->orderBy('id', 'desc')
-                ->get();
-        } else {
-            // 一般ユーザ：自分の申請のみ
-            $supplies_expenses = Expense::with('supplyExpenses')
-                ->where('user_id', $user->id)
-                ->where('expense_type', 'supplies')
-                ->orderBy('id', 'desc')
-                ->get();
-        }
-        return view('supplies.index', compact('supplies_expenses'));
+    public function index(ExpenseListService $service)
+    {
+        $type = 'supplies'; // 申請種別を指定
+        $expenses = $service->getExpenseList($type, auth()->user());
+        $headers = config("expense_headers.$type");
+        $relation = ExpenseTypeRelationMap::getRelationName($type);
+
+        return view('expenses.index', compact('expenses', 'headers', 'type', 'relation'));
     }
 
 
@@ -108,7 +99,7 @@ class SupplyController extends Controller
     public function edit($supplies_expense)
     {
         // 交通費申請の詳細を取得
-        $supplies_expense = Expense::with('supplyExpenses')->findOrFail($supplies_expense);
+        $supplies_expense = Expense::with('suppliesExpenses')->findOrFail($supplies_expense);
 
         return view('supplies.edit', compact('supplies_expense'));
     }
