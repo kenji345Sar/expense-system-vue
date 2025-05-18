@@ -12,12 +12,12 @@ return [
   'supplies' => [
     ['key' => 'id', 'label' => 'ID', 'source' => 'expense'],
     ['key' => 'user.name', 'label' => '申請者', 'source' => 'expense'],
-    ['key' => 'supply_date', 'label' => '購入日', 'source' => 'detail', 'formatter' => 'date'],
+    ['key' => 'supply_date', 'label' => '購入日', 'source' => 'detail', 'formatter' => 'date', 'type' => 'date'],
     ['key' => 'item_name', 'label' => '品名', 'source' => 'detail'],
-    ['key' => 'quantity', 'label' => '数量', 'source' => 'detail'],
-    ['key' => 'unit_price', 'label' => '単価', 'source' => 'detail'],
+    ['key' => 'quantity', 'label' => '数量', 'source' => 'detail', 'type' => 'number'],
+    ['key' => 'unit_price', 'label' => '単価', 'source' => 'detail', 'type' => 'number'],
     ['key' => 'remarks', 'label' => '備考', 'source' => 'detail'],
-    ['key' => 'amount', 'label' => '金額', 'source' => 'expense', 'formatter' => 'yen'],
+    ['key' => 'total_price', 'label' => '金額', 'source' => 'detail', 'formatter' => 'yen'],
   ],
   'business_trip' => [
     ['key' => 'id', 'label' => 'ID', 'source' => 'expense'],

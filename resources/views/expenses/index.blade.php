@@ -19,6 +19,6 @@
         @endif
 
         {{-- 共通化されたテーブルコンポーネント --}}
-        <x-expense.table :headers="$headers" :rows="$expenses" :type="$type" :relation="$relation" />
+        <x-expenses.table :headers="$headers" :rows="$expenses" :type="$type" :relation="$relation" />
     </div>
 @endsection

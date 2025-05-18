@@ -9,28 +9,51 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 use App\Services\ExpenseListService;
 use App\Helpers\ExpenseTypeRelationMap;
+use Illuminate\Support\Facades\Log;
 
 
 class SupplyController extends Controller
 {
     //
     // フォーム表示
+    // public function create()
+    // {
+    //     return view('supplies.create');
+    // }
+
     public function create()
     {
-        return view('supplies.create');
+        $details = []; // 空配列（新規用）
+
+        // 一覧用設定からフォーム用フィールドをフィルター
+        $allFields = config('expense_headers.supplies');
+        $formFields = array_values(array_filter($allFields, function ($field) {
+            return !in_array($field['key'], ['id', 'user.name']);
+        }));
+
+        return view('expenses.form', [
+            'details' => $details,
+            'pageTitle' => '備品・消耗品費 新規申請',
+            'formTitle' => '備品消耗品',
+            'formAction' => route('supplies.store'),
+            'isEdit' => false,
+            'fields' => $formFields,
+            'backUrl' => route('supplies.index'),
+
+        ]);
     }
+
 
     // データ保存
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'supplies_expenses' => 'required|array|min:1',
-            'supplies_expenses.*.supply_date' => 'required|date',
-            'supplies_expenses.*.item_name' => 'required|string|max:255',
-            'supplies_expenses.*.quantity' => 'required|integer',
-            'supplies_expenses.*.unit_price' => 'required|integer',
-            'supplies_expenses.*.total_price' => 'required|integer',
-            'supplies_expenses.*.remarks' => 'nullable|string',
+            'details' => 'required|array|min:1',
+            'details.*.supply_date' => 'required|date',
+            'details.*.item_name' => 'required|string|max:255',
+            'details.*.quantity' => 'required|integer',
+            'details.*.unit_price' => 'required|integer',
+            'details.*.remarks' => 'nullable|string',
         ]);
 
         DB::transaction(function () use ($validated, $request) {
@@ -48,7 +71,7 @@ class SupplyController extends Controller
             ]);
 
             // SupplyExpenses（明細）を登録
-            foreach ($request->input('supplies_expenses') as $index => $data) {
+            foreach ($request->input('details') as $index => $data) {
                 Supply::create([
                     'user_id'     => $userId,
                     'expense_id'  => $expense->id,
@@ -57,11 +80,12 @@ class SupplyController extends Controller
                     'item_name'   => $data['item_name'],
                     'quantity'    => $data['quantity'],
                     'unit_price'  => $data['unit_price'],
-                    'total_price' => $data['total_price'],
+                    'total_price'  =>  $data['quantity'] * $data['unit_price'],
                     'remarks'     => $data['remarks'] ?? null,
                 ]);
 
-                $totalAmount += $data['total_price'];
+                // $totalAmount += $data['total_price'];
+                $totalAmount += $data['quantity'] * $data['unit_price'];
             }
 
             // 合計金額を更新
@@ -96,37 +120,55 @@ class SupplyController extends Controller
     }
 
     // 編集画面表示
+    // public function edit($supplies_expense)
+    // {
+    //     // 交通費申請の詳細を取得
+    //     $supplies_expense = Expense::with('suppliesExpenses')->findOrFail($supplies_expense);
+
+    //     return view('supplies.edit', compact('supplies_expense'));
+    // }
+
     public function edit($supplies_expense)
     {
-        // 交通費申請の詳細を取得
+        // 一覧用設定からフォーム用フィールドをフィルター
+        $allFields = config('expense_headers.supplies');
+        $formFields = array_values(array_filter($allFields, function ($field) {
+            return !in_array($field['key'], ['id', 'user.name']);
+        }));
         $supplies_expense = Expense::with('suppliesExpenses')->findOrFail($supplies_expense);
-
-        return view('supplies.edit', compact('supplies_expense'));
+        $details = $supplies_expense->suppliesExpenses->toArray(); // 編集用データ
+        return view('expenses.form', [
+            'details' => $details,
+            'pageTitle' => '備品・消耗品費 編集フォーム',
+            'formTitle' => '備品消耗品',
+            'formAction' => route('supplies.update', $supplies_expense->id),
+            'backUrl' => route('supplies.index'),
+            'isEdit' => true,
+            'fields' => $formFields,
+        ]);
     }
 
     // 更新処理
     public function update(Request $request, $id)
     {
         $validated = $request->validate([
-            'supplies_expenses' => 'required|array|min:1',
-            'supplies_expenses.*.supply_date' => 'required|date',
-            'supplies_expenses.*.item_name' => 'required|string|max:255',
-            'supplies_expenses.*.quantity' => 'required|integer',
-            'supplies_expenses.*.unit_price' => 'required|integer',
-            'supplies_expenses.*.total_price' => 'required|integer',
-            'supplies_expenses.*.remarks' => 'nullable|string',
+            'details' => 'required|array|min:1',
+            'details.*.supply_date' => 'required|date',
+            'details.*.item_name' => 'required|string|max:255',
+            'details.*.quantity' => 'required|integer',
+            'details.*.unit_price' => 'required|integer',
+            'details.*.total_price' => 'required|integer',
+            'details.*.remarks' => 'nullable|string',
         ]);
-
         DB::transaction(function () use ($validated, $id, $request) {
 
             // Expense を取得
-            $expense = Expense::with('supplyExpenses')->findOrFail($id);
+            $expense = Expense::with('suppliesExpenses')->findOrFail($id);
 
             // 明細を一旦削除
             Supply::where('expense_id', $id)->delete();
-
             // 明細を再挿入
-            foreach ($validated['supplies_expenses'] as $index => $row) {
+            foreach ($validated['details'] as $index => $row) {
                 Supply::create([
                     'expense_id'         => $id,
                     'user_id'            => auth()->id(),
@@ -147,7 +189,6 @@ class SupplyController extends Controller
                 'description' => $request->description,
             ]);
         });
-
         return redirect()
             ->route('supplies.index')
             ->with('success', '更新が完了しました！');

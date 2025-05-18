@@ -14,6 +14,8 @@ import ExpenseForm from './components/ExpenseForm.vue';
 import FormRow from './components/FormRow.vue';
 import EntertainmentForm from './components/EntertainmentForm.vue';
 import SuppliesForm from './components/SuppliesForm.vue';
+import ExpenseFormUnify from './components/ExpenseFormUnify.vue';
+
 
 
 
@@ -26,6 +28,7 @@ app.component('expense-form', ExpenseForm);
 app.component('form-row', FormRow);
 app.component('supply-form', SuppliesForm);
 app.component('entertainment-form', EntertainmentForm);
+app.component('expense-form-unify', ExpenseFormUnify);
 
 
 app.mount('#app');

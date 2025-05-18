@@ -50,7 +50,7 @@
                             $value = \App\Helpers\ExpenseFormatter::format($raw, $header['formatter'] ?? null);
                         @endphp
 
-                        <td class="border px-3 py-2 {{ $isNewGroup ? 'border-t-4 border-blue-500' : '' }}">
+                        <td class="border px-3 py-2 ">
                             {{ $value }}
                         </td>
                     @endforeach
