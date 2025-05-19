@@ -12,22 +12,45 @@ use App\Helpers\ExpenseTypeRelationMap;
 class EntertainmentController extends Controller
 {
     // フォーム表示
+    // public function create()
+    // {
+    //     return view('entertainment.create');
+    // }
+
     public function create()
     {
-        return view('entertainment.create');
+        $details = []; // 空配列（新規用）
+
+        // 一覧用設定からフォーム用フィールドをフィルター
+        $allFields = config('expense_headers.entertainment');
+        $formFields = array_values(array_filter($allFields, function ($field) {
+            return !in_array($field['key'], ['id', 'user.name']);
+        }));
+
+        return view('expenses.form', [
+            'details' => $details,
+            'pageTitle' => '接待費 新規申請',
+            'formTitle' => '接待費申請',
+            'formAction' => route('entertainment.store'),
+            'isEdit' => false,
+            'fields' => $formFields,
+            'backUrl' => route('entertainment.index'),
+
+        ]);
     }
+
 
     // データ保存
     public function store(Request $request)
     {
         $validated = $request->validate([
             'description' => 'nullable|string|max:255',
-            'entertainment_expenses' => 'required|array|min:1',
-            'entertainment_expenses.*.entertainment_date' => 'required|date',
-            'entertainment_expenses.*.client_name' => 'required|string|max:100',
-            'entertainment_expenses.*.place' => 'required|string|max:100',
-            'entertainment_expenses.*.content' => 'nullable|string|max:255',
-            'entertainment_expenses.*.amount' => 'required|numeric|min:0',
+            'details' => 'required|array|min:1',
+            'details.*.entertainment_date' => 'required|date',
+            'details.*.client_name' => 'required|string|max:100',
+            'details.*.place' => 'required|string|max:100',
+            'details.*.content' => 'nullable|string|max:255',
+            'details.*.amount' => 'required|numeric|min:0',
         ]);
 
         DB::transaction(function () use ($request, $validated) {
@@ -44,7 +67,7 @@ class EntertainmentController extends Controller
                 'status'       => 'draft',
             ]);
             // ② 明細を登録して紐づけ、合計金額も計算
-            foreach ($request->input('entertainment_expenses') as $index => $data) {
+            foreach ($request->input('details') as $index => $data) {
                 Entertainment::create([
                     'user_id'       => $userId,
                     'expense_id'    => $expense->id,
@@ -113,24 +136,49 @@ class EntertainmentController extends Controller
     }
 
     // 編集画面表示
+    // public function edit($id)
+    // {
+
+    //     $entertainment = Expense::with('entertainmentExpenses')->findOrFail($id);
+    //     return view('entertainment.edit', compact('entertainment'));
+    // }
+
     public function edit($id)
     {
 
-        $entertainment = Expense::with('entertainmentExpenses')->findOrFail($id);
-        return view('entertainment.edit', compact('entertainment'));
+        // 一覧用設定からフォーム用フィールドをフィルター
+        $allFields = config('expense_headers.entertainment');
+        $formFields = array_values(array_filter($allFields, function ($field) {
+            return !in_array($field['key'], ['id', 'user.name']);
+        }));
+        $entertainment_expense = Expense::with('entertainmentExpenses')->findOrFail($id);
+        $details = $entertainment_expense->entertainmentExpenses->toArray(); // 編集用データ
+        return view('expenses.form', [
+            'details' => $details,
+            'pageTitle' => '接待費 編集フォーム',
+            'formTitle' => '接待費申請',
+            'formAction' => route('entertainment.update', $id),
+            'backUrl' => route('entertainment.index'),
+            'isEdit' => true,
+            'fields' => $formFields,
+        ]);
     }
+
+
+
+
 
     // 更新処理
     public function update(Request $request, $id)
     {
         $validated = $request->validate([
             'description' => 'nullable|string|max:255',
-            'entertainment_expenses' => 'required|array|min:1',
-            'entertainment_expenses.*.entertainment_date' => 'required|date',
-            'entertainment_expenses.*.client_name' => 'required|string|max:100',
-            'entertainment_expenses.*.place' => 'required|string|max:100',
-            'entertainment_expenses.*.content' => 'nullable|string|max:255',
-            'entertainment_expenses.*.amount' => 'required|numeric|min:0',
+            'details' => 'required|array|min:1',
+            'details.*.entertainment_date' => 'required|date',
+            'details.*.client_name' => 'required|string|max:100',
+            'details.*.place' => 'required|string|max:100',
+            'details.*.content' => 'nullable|string|max:255',
+            'details.*.amount' => 'required|numeric|min:0',
         ]);
 
         DB::transaction(function () use ($validated, $id, $request) {
@@ -142,7 +190,7 @@ class EntertainmentController extends Controller
             Entertainment::where('expense_id', $id)->delete();
 
             // 明細を再挿入
-            foreach ($validated['entertainment_expenses'] as $index => $row) {
+            foreach ($validated['details'] as $index => $row) {
                 Entertainment::create([
                     'expense_id'         => $id,
                     'user_id'            => auth()->id(),
@@ -165,7 +213,7 @@ class EntertainmentController extends Controller
         });
 
         return redirect()
-            ->route('transportation.index')
+            ->route('entertainment.index')
             ->with('success', '更新が完了しました！');
     }
     // 削除処理

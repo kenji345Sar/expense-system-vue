@@ -40,6 +40,9 @@
         <li v-for="(err, i) in errors" :key="i">・{{ err }}</li>
       </ul>
     </div>
+    <div v-if="successMessage" class="text-green-600 mb-4">
+      {{ successMessage }}
+    </div>
 
     <div class="mt-4 flex gap-2">
       <button type="button" class="bg-green-500 text-white px-4 py-1 rounded mr-2" @click="validateBeforeSubmit">入力チェック</button>
@@ -79,12 +82,17 @@ const props = defineProps({
 
 const rows = ref([])
 const errors = ref([])
+const successMessage = ref('');
 
 
 function createEmptyRow() {
   const row = {}
   props.fields.forEach(field => {
-    row[field.name] = ''
+    if (field.type === 'number') {
+      row[field.name] = 0
+    } else {
+      row[field.name] = ''
+    }
   })
   return row
 }
@@ -108,6 +116,8 @@ function validateBeforeSubmit() {
 
   rows.value.forEach((row, i) => {
     props.fields.forEach(field => {
+      if (field.required === false) return;
+
       const key = field.key;
       const label = field.label;
       const value = row[key];
@@ -125,7 +135,8 @@ function validateBeforeSubmit() {
   });
 
   if (errors.value.length === 0) {
-    document.querySelector('form').submit();
+    successMessage.value = '入力内容に問題はありません。';
+    // document.querySelector('form').submit();
   }
 }
 
@@ -143,20 +154,16 @@ watchEffect(() => {
 
     if (!isNaN(quantity) && !isNaN(unitPrice)) {
       const total = quantity * unitPrice
-
-      if ('amount' in row) {
-        row.amount = total
-      } else if ('total_price' in row) {
+      if ('total_price' in row) {
         row.total_price = total
       }
     } else {
-      if ('amount' in row) {
-        row.amount = ''
-      } else if ('total_price' in row) {
-        row.total_price = ''
+      if ('total_price' in row) {
+        row.total_price = null
       }
     }
   })
 })
+
 
 </script>
