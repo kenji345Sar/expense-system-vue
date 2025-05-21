@@ -10,8 +10,16 @@ use App\Services\ExpenseListService;
 use Illuminate\Support\Facades\Log;
 use App\Helpers\ExpenseTypeRelationMap;
 
-class BusinessTripController extends Controller
+use App\Http\Requests\StoreBusinessTripRequest;
+use App\Http\Requests\UpdateBusinessTripRequest;
+use App\Services\ExpenseService;
+
+class BusinessTripController extends BaseExpenseController
 {
+
+    protected string $expenseType = 'business_trip';
+    protected string $modelClass = BusinessTrip::class;
+    protected string $routeName = 'business_trip.index';
     //
     // 登録フォーム表示
     // public function create()
@@ -19,87 +27,108 @@ class BusinessTripController extends Controller
     //     return view('business_trip.create');
     // }
 
+    // public function create()
+    // {
+    //     $details = []; // 空配列（新規用）
+
+    //     // 一覧用設定からフォーム用フィールドをフィルター
+    //     $allFields = config('expense_headers.business_trip');
+    //     $formFields = array_values(array_filter($allFields, function ($field) {
+    //         return !in_array($field['key'], ['id', 'user.name']);
+    //     }));
+
+    //     return view('expenses.form', [
+    //         'details' => $details,
+    //         'pageTitle' => '出張旅費 新規申請',
+    //         'formTitle' => '出張旅費申請',
+    //         'formAction' => route('business_trip.store'),
+    //         'isEdit' => false,
+    //         'fields' => $formFields,
+    //         'backUrl' => route('business_trip.index'),
+
+    //     ]);
+    // }
+
     public function create()
     {
-        $details = []; // 空配列（新規用）
-
-        // 一覧用設定からフォーム用フィールドをフィルター
-        $allFields = config('expense_headers.business_trip');
-        $formFields = array_values(array_filter($allFields, function ($field) {
-            return !in_array($field['key'], ['id', 'user.name']);
-        }));
-
-        return view('expenses.form', [
-            'details' => $details,
-            'pageTitle' => '出張旅費 新規申請',
-            'formTitle' => '出張旅費申請',
-            'formAction' => route('business_trip.store'),
-            'isEdit' => false,
-            'fields' => $formFields,
-            'backUrl' => route('business_trip.index'),
-
-        ]);
+        return $this->buildFormView(
+            'business_trip',
+            '出張旅費 新規作成フォーム',
+            '出張旅費申請',
+            route('business_trip.store'),
+            route('business_trip.index')
+        );
     }
 
-    // データ保存
-    public function store(Request $request)
+    //  php artisan make:request StoreEntertainmentRequest
+    public function store(StoreBusinessTripRequest $request)
     {
 
-        $validated = $request->validate([
-            'description' => 'nullable|string|max:1000',
-            'details' => 'required|array',
-            'details.*.business_trip_date' => 'required|date',
-            'details.*.departure' => 'required|string|max:255',
-            'details.*.destination' => 'required|string|max:255',
-            'details.*.purpose' => 'nullable|string|max:255',
-            'details.*.amount' => 'required|integer',
-            'details.*.remarks' => 'nullable|string',
-        ]);
-
-        DB::transaction(function () use ($request, $validated) {
-            $userId = auth()->id();
-            $totalAmount = 0;
-            // $descriptions = [];
-
-
-            // ① Expenseを先に作る（明細を紐づけるための伝票ID）
-            $expense = Expense::create([
-                'user_id'      => $userId,
-                'date'         => now(),
-                'amount'       => 0,       // 後で更新
-                'description'  => $request->description,      // 後で更新
-                'expense_type' => 'business_trip',
-                'status'       => 'draft',
-            ]);
-
-            // ② 明細を登録して紐づけ、合計金額も計算
-            foreach ($request->input('details') as $index => $data) {
-                BusinessTrip::create([
-                    'user_id'       => $userId,
-                    'expense_id'    => $expense->id,
-                    'display_order' => $index,
-                    'business_trip_date'      => $data['business_trip_date'],
-                    'departure'     => $data['departure'],
-                    'destination'       => $data['destination'],
-                    'purpose'         => $data['purpose'],
-                    'amount'        => $data['amount'],
-                    'remarks'       => $data['remarks'] ?? null,
-                ]);
-
-                $totalAmount += $data['amount'];
-            }
-
-            // ③ Expense を更新（合計金額・概要）
-            $expense->update([
-                'amount'      => $totalAmount,
-                'description' =>  $request->description,
-            ]);
-        });
-
-
-
+        $this->expenseService->store($request->validated(), 'business_trip', BusinessTrip::class);
         return redirect()->route('business_trip.index')->with('success', '登録が完了しました！');
     }
+
+
+
+    // データ保存
+    // public function store(Request $request)
+    // {
+
+    //     $validated = $request->validate([
+    //         'description' => 'nullable|string|max:1000',
+    //         'details' => 'required|array',
+    //         'details.*.business_trip_date' => 'required|date',
+    //         'details.*.departure' => 'required|string|max:255',
+    //         'details.*.destination' => 'required|string|max:255',
+    //         'details.*.purpose' => 'nullable|string|max:255',
+    //         'details.*.amount' => 'required|integer',
+    //         'details.*.remarks' => 'nullable|string',
+    //     ]);
+
+    //     DB::transaction(function () use ($request, $validated) {
+    //         $userId = auth()->id();
+    //         $totalAmount = 0;
+    //         // $descriptions = [];
+
+
+    //         // ① Expenseを先に作る（明細を紐づけるための伝票ID）
+    //         $expense = Expense::create([
+    //             'user_id'      => $userId,
+    //             'date'         => now(),
+    //             'amount'       => 0,       // 後で更新
+    //             'description'  => $request->description,      // 後で更新
+    //             'expense_type' => 'business_trip',
+    //             'status'       => 'draft',
+    //         ]);
+
+    //         // ② 明細を登録して紐づけ、合計金額も計算
+    //         foreach ($request->input('details') as $index => $data) {
+    //             BusinessTrip::create([
+    //                 'user_id'       => $userId,
+    //                 'expense_id'    => $expense->id,
+    //                 'display_order' => $index,
+    //                 'business_trip_date'      => $data['business_trip_date'],
+    //                 'departure'     => $data['departure'],
+    //                 'destination'       => $data['destination'],
+    //                 'purpose'         => $data['purpose'],
+    //                 'amount'        => $data['amount'],
+    //                 'remarks'       => $data['remarks'] ?? null,
+    //             ]);
+
+    //             $totalAmount += $data['amount'];
+    //         }
+
+    //         // ③ Expense を更新（合計金額・概要）
+    //         $expense->update([
+    //             'amount'      => $totalAmount,
+    //             'description' =>  $request->description,
+    //         ]);
+    //     });
+
+
+
+    //     return redirect()->route('business_trip.index')->with('success', '登録が完了しました！');
+    // }
 
     // 一覧表示
 
@@ -158,73 +187,101 @@ class BusinessTripController extends Controller
     //     return view('business_trip.edit', compact('business_trip'));
     // }
 
+    // public function edit($id)
+    // {
+
+    //     // 一覧用設定からフォーム用フィールドをフィルター
+    //     $allFields = config('expense_headers.business_trip');
+    //     $formFields = array_values(array_filter($allFields, function ($field) {
+    //         return !in_array($field['key'], ['id', 'user.name']);
+    //     }));
+    //     $business_trip_expense = Expense::with('businessTripExpenses')->findOrFail($id);
+    //     $details = $business_trip_expense->businessTripExpenses->toArray(); // 編集用データ
+    //     return view('expenses.form', [
+    //         'details' => $details,
+    //         'pageTitle' => '出張旅費 編集フォーム',
+    //         'formTitle' => '出張旅費申請',
+    //         'formAction' => route('business_trip.update', $id),
+    //         'backUrl' => route('business_trip.index'),
+    //         'isEdit' => true,
+    //         'fields' => $formFields,
+    //     ]);
+    // }
+
     public function edit($id)
     {
+        $expense = Expense::with('businessTripExpenses')->findOrFail($id);
+        $details = $expense->businessTripExpenses->toArray();
 
-        // 一覧用設定からフォーム用フィールドをフィルター
-        $allFields = config('expense_headers.business_trip');
-        $formFields = array_values(array_filter($allFields, function ($field) {
-            return !in_array($field['key'], ['id', 'user.name']);
-        }));
-        $business_trip_expense = Expense::with('businessTripExpenses')->findOrFail($id);
-        $details = $business_trip_expense->businessTripExpenses->toArray(); // 編集用データ
-        return view('expenses.form', [
-            'details' => $details,
-            'pageTitle' => '出張旅費 編集フォーム',
-            'formTitle' => '出張旅費申請',
-            'formAction' => route('business_trip.update', $id),
-            'backUrl' => route('business_trip.index'),
-            'isEdit' => true,
-            'fields' => $formFields,
-        ]);
+        return $this->buildFormView(
+            'business_trip',
+            '出張旅費 編集フォーム',
+            '出張旅費申請',
+            route('business_trip.update', $id),
+            route('business_trip.index'),
+            $details,
+            true
+        );
     }
 
-
-    // 更新処理
-    public function update(Request $request, $id)
+    public function update(UpdateBusinessTripRequest $request, $id)
     {
-        $validated = $request->validate([
-            'details' => 'required|array',
-            'details.*.business_trip_date' => 'required|date',
-            'details.*.departure' => 'required|string|max:255',
-            'details.*.destination' => 'required|string|max:255',
-            'details.*.purpose' => 'nullable|string|max:255',
-            'details.*.amount' => 'required|integer',
-            'details.*.remarks' => 'nullable|string',
-        ]);
-        DB::transaction(function () use ($validated, $id, $request) {
-
-            // Expense を取得
-            $expense = Expense::with('businessTripExpenses')->findOrFail($id);
-
-            // 明細を一旦削除
-            BusinessTrip::where('expense_id', $id)->delete();
-
-            // 明細を再挿入
-            foreach ($validated['details'] as $index => $row) {
-                BusinessTrip::create([
-                    'expense_id'         => $id,
-                    'user_id'            => auth()->id(),
-                    'display_order'      => $index,
-                    'business_trip_date' => $row['business_trip_date'],
-                    'departure'          => $row['departure'],
-                    'destination'        => $row['destination'],
-                    'purpose'            => $row['purpose'] ?? null,
-                    'amount'             => $row['amount'],
-                    'remarks'            => $row['remarks'] ?? null,
-                ]);
-            }
-
-            // 合計金額と申請メモ（description）を更新
-            $totalAmount = BusinessTrip::where('expense_id', $id)->sum('amount');
-            $expense->update([
-                'amount'      => $totalAmount,
-                'description' => $request->description,
-            ]);
-        });
-
-        return redirect()->route('business_trip.index')->with('success', '更新が完了しました！');
+        return parent::updateValidated($request->validated(), $id);
     }
+
+
+    // public function update(UpdateBusinessTripRequest $request, $id)
+    // {
+    //     $this->expenseService->update($request->validated(),  BusinessTrip::class, $id);
+    //     return redirect()->route('business_trip.index')->with('success', '更新が完了しました！');
+    // }
+
+
+    // // 更新処理
+    // public function update(Request $request, $id)
+    // {
+    //     $validated = $request->validate([
+    //         'details' => 'required|array',
+    //         'details.*.business_trip_date' => 'required|date',
+    //         'details.*.departure' => 'required|string|max:255',
+    //         'details.*.destination' => 'required|string|max:255',
+    //         'details.*.purpose' => 'nullable|string|max:255',
+    //         'details.*.amount' => 'required|integer',
+    //         'details.*.remarks' => 'nullable|string',
+    //     ]);
+    //     DB::transaction(function () use ($validated, $id, $request) {
+
+    //         // Expense を取得
+    //         $expense = Expense::with('businessTripExpenses')->findOrFail($id);
+
+    //         // 明細を一旦削除
+    //         BusinessTrip::where('expense_id', $id)->delete();
+
+    //         // 明細を再挿入
+    //         foreach ($validated['details'] as $index => $row) {
+    //             BusinessTrip::create([
+    //                 'expense_id'         => $id,
+    //                 'user_id'            => auth()->id(),
+    //                 'display_order'      => $index,
+    //                 'business_trip_date' => $row['business_trip_date'],
+    //                 'departure'          => $row['departure'],
+    //                 'destination'        => $row['destination'],
+    //                 'purpose'            => $row['purpose'] ?? null,
+    //                 'amount'             => $row['amount'],
+    //                 'remarks'            => $row['remarks'] ?? null,
+    //             ]);
+    //         }
+
+    //         // 合計金額と申請メモ（description）を更新
+    //         $totalAmount = BusinessTrip::where('expense_id', $id)->sum('amount');
+    //         $expense->update([
+    //             'amount'      => $totalAmount,
+    //             'description' => $request->description,
+    //         ]);
+    //     });
+
+    //     return redirect()->route('business_trip.index')->with('success', '更新が完了しました！');
+    // }
     // 削除処理
     public function destroy($id)
     {
@@ -256,7 +313,7 @@ class BusinessTripController extends Controller
     }
 
 
-    // 交通手段の選択肢を取得  
+    // 交通手段の選択肢を取得
     public function getTransportationOptions()
     {
         return [

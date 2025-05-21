@@ -10,10 +10,10 @@
 
 ## 使用技術
 
-- Laravel
-- Vue.js
-- MySQL
-- Docker
+-   Laravel
+-   Vue.js
+-   MySQL
+-   Docker
 
 ---
 
@@ -28,10 +28,19 @@ docker-compose up -d
 ```
 
 ## 現在の開発ブランチと内容
-main:feature/module-list-unify
+
+main:feature/unify-controller
+- BaseExpenseController を追加し、4モジュールの共通処理を継承構造に統一
+- データ登録・更新処理は ExpenseService に移植
+- バリデーションは各モジュールの Request クラスに分離
+
+feature/module-add-modify-unity
+
+-   全モジュールの新規・編集フォームを共通化
+-   過去の create/edit/index ファイルは xxx\_\*.blade.php にリネームし、混乱防止のため一時保持中
+
+feature/module-list-unify
 各モジュールの一覧画面を共通化し、再利用可能なレイアウトに統一
 
 feature/unify-form-v2
 各モジュールの新規登録・編集画面の共通化対応
-
-

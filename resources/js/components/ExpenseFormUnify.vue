@@ -21,7 +21,7 @@
           :name="`${namespace}[${index}][${field.key}]`"
           v-model="rows[index][field.key]"
           :placeholder="field.placeholder"
-          :readonly="field.readonly || false"
+          :readonly="field.key === 'total_price'"
         />
 
         <textarea
@@ -30,7 +30,6 @@
           :name="`${namespace}[${index}][${field.key}]`"
           v-model="rows[index][field.key]"
           :placeholder="field.placeholder"
-          :readonly="field.readonly || false"
         ></textarea>
       </div>
     </div>
@@ -89,9 +88,9 @@ function createEmptyRow() {
   const row = {}
   props.fields.forEach(field => {
     if (field.type === 'number') {
-      row[field.name] = 0
+      row[field.key] = 0
     } else {
-      row[field.name] = ''
+      row[field.key] = ''
     }
   })
   return row

@@ -3,7 +3,15 @@
 @section('content')
     <div id="app" class="max-w-3xl mx-auto py-6">
         <h2 class="text-xl font-bold mb-4">{{ $pageTitle }}</h2>
-
+        @if ($errors->any())
+            <div class="mb-4 text-red-600">
+                <ul>
+                    @foreach ($errors->all() as $error)
+                        <li>・{{ $error }}</li>
+                    @endforeach
+                </ul>
+            </div>
+        @endif
         <form method="POST" action="{{ $formAction }}">
             @csrf
             @if ($isEdit)
@@ -16,7 +24,7 @@
             </div>
 
             <!-- prettier-ignore -->
-            <expense-form-unify 
+            <expense-form-unify
             :initial-items="{{ json_encode(old('details', $details ?? [])) }}"
             :fields="{{ json_encode($fields) }}"
             form-title="{{ $formTitle }}"

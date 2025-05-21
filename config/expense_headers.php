@@ -18,7 +18,7 @@ return [
     ['key' => 'quantity', 'label' => '数量', 'source' => 'detail', 'type' => 'number', 'required' => true],
     ['key' => 'unit_price', 'label' => '単価', 'source' => 'detail', 'type' => 'number', 'required' => true],
     ['key' => 'remarks', 'label' => '備考', 'source' => 'detail', 'required' => false],
-    ['key' => 'total_price', 'label' => '金額', 'source' => 'detail', 'formatter' => 'yen', 'required' => true],
+    ['key' => 'total_price', 'label' => '金額', 'source' => 'detail', 'formatter' => 'yen', 'type' => 'number', 'required' => true],
   ],
   'business_trip' => [
     ['key' => 'id', 'label' => 'ID', 'source' => 'expense', 'required' => true],
