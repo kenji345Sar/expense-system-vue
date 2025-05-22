@@ -18,32 +18,7 @@ class TransportationController  extends BaseExpenseController
     protected string $expenseType = 'transportation';
     protected string $modelClass = Transportation::class;
     protected string $routeName = 'transportation.index';
-    // public function create()
-    // {
-    //     return view('transportation.create');
-    // }
 
-    // public function create()
-    // {
-    //     $details = []; // 空配列（新規用）
-
-    //     // 一覧用設定からフォーム用フィールドをフィルター
-    //     $allFields = config('expense_headers.transportation');
-    //     $formFields = array_values(array_filter($allFields, function ($field) {
-    //         return !in_array($field['key'], ['id', 'user.name']);
-    //     }));
-
-    //     return view('expenses.form', [
-    //         'details' => $details,
-    //         'pageTitle' => '交通費 新規申請',
-    //         'formTitle' => '交通費申請',
-    //         'formAction' => route('transportation.store'),
-    //         'isEdit' => false,
-    //         'fields' => $formFields,
-    //         'backUrl' => route('transportation.index'),
-
-    //     ]);
-    // }
 
     public function create()
     {
@@ -56,27 +31,7 @@ class TransportationController  extends BaseExpenseController
         );
     }
 
-    // public function index()
-    // {
-    //     $user = auth()->user();
 
-    //     if ($user?->is_admin) {
-    //         // 管理者：全ユーザー分の交通費申請
-    //         $expenses = Expense::with('transportationExpenses', 'user')
-    //             ->where('expense_type', 'transportation') // transportation固定
-    //             ->orderBy('id', 'desc')
-    //             ->get();
-    //     } else {
-    //         // 一般ユーザ：自分の申請のみ
-    //         $expenses = Expense::with('transportationExpenses')
-    //             ->where('user_id', $user->id)
-    //             ->where('expense_type', 'transportation')
-    //             ->orderBy('id', 'desc')
-    //             ->get();
-    //     }
-
-    //     return view('transportation.index', compact('expenses'));
-    // }
 
     public function index(ExpenseListService $service)
     {
@@ -105,91 +60,7 @@ class TransportationController  extends BaseExpenseController
         return redirect()->route('transportation.index')->with('success', '登録が完了しました！');
     }
 
-    // public function store(Request $request)
-    // {
-    //     $validated = $request->validate([
-    //         'description' => 'nullable|string|max:255',
-    //         'details' => 'required|array|min:1',
-    //         'details.*.use_date' => 'required|date',
-    //         'details.*.departure' => 'required|string|max:100',
-    //         'details.*.arrival' => 'required|string|max:100',
-    //         'details.*.route' => 'nullable|string|max:255',
-    //         'details.*.amount' => 'required|numeric|min:0',
-    //         'details.*.remarks' => 'nullable|string|max:255',
-    //     ]);
 
-    //     DB::transaction(function () use ($request, $validated) {
-    //         $userId = auth()->id();
-    //         $totalAmount = 0;
-    //         $descriptions = [];
-
-    //         // ① Expenseを先に作る（明細を紐づけるための伝票ID）
-    //         $expense = Expense::create([
-    //             'user_id'      => $userId,
-    //             'date'         => now(),
-    //             'amount'       => 0,       // 後で更新
-    //             'description'  => '',      // 後で更新
-    //             'expense_type' => 'transportation',
-    //             'status'       => 'draft',
-    //         ]);
-    //         // ② 明細を登録して紐づけ、合計金額も計算
-    //         foreach ($request->input('details') as $index => $data) {
-    //             Transportation::create([
-    //                 'user_id'       => $userId,
-    //                 'expense_id'    => $expense->id,
-    //                 'display_order' => $index,
-    //                 'use_date'      => $data['use_date'],
-    //                 'departure'     => $data['departure'],
-    //                 'arrival'       => $data['arrival'],
-    //                 'route'         => $data['route'],
-    //                 'amount'        => $data['amount'],
-    //                 'remarks'       => $data['remarks'] ?? null,
-    //             ]);
-
-    //             $totalAmount += $data['amount'];
-    //         }
-
-    //         // ③ Expense を更新（合計金額・概要）
-    //         $expense->update([
-    //             'amount'      => $totalAmount,
-    //             'description' => $request->description,
-    //         ]);
-    //     });
-
-    //     return redirect()
-    //         ->route('transportation.index')
-    //         ->with('success', '登録が完了しました！');
-    // }
-
-
-
-
-    // public function edit($id)
-    // {
-    //     $transportation = Expense::with('transportationExpenses')->findOrFail($id);
-    //     return view('transportation.edit', compact('transportation'));
-    // }
-
-    // public function edit($id)
-    // {
-
-    //     // 一覧用設定からフォーム用フィールドをフィルター
-    //     $allFields = config('expense_headers.transportation');
-    //     $formFields = array_values(array_filter($allFields, function ($field) {
-    //         return !in_array($field['key'], ['id', 'user.name']);
-    //     }));
-    //     $transportation_expense = Expense::with('transportationExpenses')->findOrFail($id);
-    //     $details = $transportation_expense->transportationExpenses->toArray(); // 編集用データ
-    //     return view('expenses.form', [
-    //         'details' => $details,
-    //         'pageTitle' => '出張旅費 編集フォーム',
-    //         'formTitle' => '出張旅費申請',
-    //         'formAction' => route('transportation.update', $id),
-    //         'backUrl' => route('transportation.index'),
-    //         'isEdit' => true,
-    //         'fields' => $formFields,
-    //     ]);
-    // }
 
 
     public function edit($id)
@@ -212,61 +83,7 @@ class TransportationController  extends BaseExpenseController
     {
         return parent::updateValidated($request->validated(), $id);
     }
-    // public function update(UpdateTransportationRequest $request, $id)
-    // {
-    //     $this->expenseService->update($request->validated(),  Transportation::class, $id);
-    //     return redirect()->route('transportation.index')->with('success', '更新が完了しました！');
-    // }
 
-
-    // public function update(Request $request, $id)
-    // {
-    //     $validated = $request->validate([
-    //         'description' => 'nullable|string|max:255',
-    //         'details' => 'required|array|min:1',
-    //         'details.*.use_date' => 'required|date',
-    //         'details.*.departure' => 'required|string|max:100',
-    //         'details.*.arrival' => 'required|string|max:100',
-    //         'details.*.route' => 'nullable|string|max:255',
-    //         'details.*.amount' => 'required|numeric|min:0',
-    //         'details.*.remarks' => 'nullable|string|max:255',
-    //     ]);
-
-    //     DB::transaction(function () use ($validated, $id, $request) {
-
-    //         // Expense を取得
-    //         $expense = Expense::with('transportationExpenses')->findOrFail($id);
-
-    //         // 明細を一旦削除
-    //         Transportation::where('expense_id', $id)->delete();
-
-    //         // 明細を再挿入
-    //         foreach ($validated['details'] as $index => $row) {
-    //             Transportation::create([
-    //                 'expense_id'         => $id,
-    //                 'user_id'            => auth()->id(),
-    //                 'display_order'      => $index,
-    //                 'use_date' => $row['use_date'],
-    //                 'departure'          => $row['departure'],
-    //                 'arrival'        => $row['arrival'],
-    //                 'route'            => $row['route'],
-    //                 'amount'             => $row['amount'],
-    //                 'remarks'            => $row['remarks'] ?? null,
-    //             ]);
-    //         }
-
-    //         // 合計金額と申請メモ（description）を更新
-    //         $totalAmount = Transportation::where('expense_id', $id)->sum('amount');
-    //         $expense->update([
-    //             'amount'      => $totalAmount,
-    //             'description' => $request->description,
-    //         ]);
-    //     });
-
-    //     return redirect()
-    //         ->route('transportation.index')
-    //         ->with('success', '更新が完了しました！');
-    // }
 
     public function destroy($id)
     {
