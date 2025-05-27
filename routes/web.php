@@ -7,10 +7,15 @@ use App\Http\Controllers\TransportationController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\EntertainmentController;
 use App\Http\Controllers\SupplyController;
+use App\Http\Controllers\AllExpensesController;
+
+
 
 Route::get('/', function () {
     return view('welcome');
 });
+Route::redirect('/expenses', '/expenses/menu');
+
 
 Route::middleware(['auth'])->group(function () {
     Route::get('/expenses/menu', function () {
@@ -25,6 +30,12 @@ Route::middleware(['auth'])->group(function () {
     Route::resource('expenses/entertainment', EntertainmentController::class)
         ->names('entertainment');
 });
+
+Route::get('/expenses/all', [AllExpensesController::class, 'index'])->name('expenses.all');
+Route::get('/expenses/index', fn() => 'dummy expenses')->name('expenses.index');
+// routes/web.php
+Route::get('/expenses/export', [AllExpensesController::class, 'export'])->name('expenses.export');
+
 
 // 以下は未実装のルートに対するダミー
 // Route::get('/expenses/business_trip', fn() => 'dummy business_trip')->name('business_trip.index');
@@ -43,7 +54,7 @@ Route::get('/expenses/entertainment/apply', fn() => 'dummy entertainment')->name
 // Route::get('/expenses/supplies', fn() => 'dummy supplies')->name('supplies.index');
 // Route::get('/expenses/entertainment', fn() => 'dummy entertainment')->name('entertainment.index');
 // Route::get('/expenses/transportation', fn() => 'dummy transportation')->name('transportation.index');
-Route::get('/expenses', fn() => 'dummy expenses')->name('expenses.index');
+// Route::get('/expenses', fn() => 'dummy expenses')->name('expenses.index');
 
 Route::get('/dashboard', function () {
     return view('dashboard');
