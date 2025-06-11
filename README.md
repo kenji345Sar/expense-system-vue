@@ -23,8 +23,20 @@
 git clone <このリポジトリ>
 cd expense-system-vue
 cp .env.example .env
-# 必要に応じて設定を変更
-docker-compose up -d
+# 開発環境
+ docker-compose -f docker/dev/docker-compose.yml up -d
+
+## Laravelアプリケーションサーバーの起動
+
+```bash
+# Laravelアプリケーションコンテナに接続
+docker exec -it dev-app-1 bash
+
+# Laravel開発サーバーを起動（コンテナ内で実行）
+php artisan serve --host=0.0.0.0 --port=8000
+```
+
+
 ```
 
 ## 現在の開発ブランチと内容
