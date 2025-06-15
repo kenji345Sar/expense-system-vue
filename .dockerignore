@@ -1,0 +1,12 @@
+node_modules
+vendor
+.git
+.dockerignore
+.docker
+*.sqlite
+*.log
+.idea
+.vscode
+.env
+!.env.production
+public/storage
