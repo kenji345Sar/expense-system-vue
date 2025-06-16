@@ -11,3 +11,17 @@ services:
         value: false
       - key: APP_KEY
         generateValue: true
+      - key: APP_URL
+        value: https://expense-system.onrender.com
+      - key: DB_CONNECTION
+        value: mysql
+      - key: DB_HOST
+        value: prod-mysql-1
+      - key: DB_PORT
+        value: 3306
+      - key: DB_DATABASE
+        value: laravel
+      - key: DB_USERNAME
+        value: root
+      - key: DB_PASSWORD
+        value: rootpass123
