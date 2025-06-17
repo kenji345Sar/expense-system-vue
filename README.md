@@ -19,7 +19,7 @@
 
 ## 起動方法
 
-```bash
+````bash
 git clone <このリポジトリ>
 cd expense-system-vue
 cp .env.example .env
@@ -35,30 +35,32 @@ docker exec -it dev-app-1 bash
 
 # Laravel開発サーバーを起動（コンテナ内で実行）
 php artisan serve --host=0.0.0.0 --port=8000
-```
+````
 
-
+```bash
 # 開発環境2
 
 docker-compose -f docker/prod/docker-compose.dev.yml up -d --build
+```
 
-| 操作        | コマンド                                                                 |
-| --------- | -------------------------------------------------------------------- |
-| コンテナ起動    | `docker-compose -f docker/prod/docker-compose.dev.yml up -d --build` |
+| 操作               | コマンド                                                             |
+| ------------------ | -------------------------------------------------------------------- |
+| コンテナ起動       | `docker-compose -f docker/prod/docker-compose.dev.yml up -d --build` |
 | コンテナ停止・削除 | `docker-compose -f docker/prod/docker-compose.dev.yml down`          |
-| ログ確認      | `docker-compose -f docker/prod/docker-compose.dev.yml logs -f`       |
+| ログ確認           | `docker-compose -f docker/prod/docker-compose.dev.yml logs -f`       |
 
-
+```bash
 # 1. Blade キャッシュ削除
+
 docker exec -it prod-app-1 php artisan view:clear
 
 # 2. その他 Laravel キャッシュ削除
+
 docker exec -it prod-app-1 php artisan config:clear
 docker exec -it prod-app-1 php artisan route:clear
 docker exec -it prod-app-1 php artisan cache:clear
 
 # 3. ブラウザキャッシュ削除 or シークレットモードで再アクセス
-
 
 ```
 
@@ -82,3 +84,4 @@ feature/module-list-unify
 
 feature/unify-form-v2
 各モジュールの新規登録・編集画面の共通化対応
+```
