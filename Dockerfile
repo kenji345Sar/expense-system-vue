@@ -31,4 +31,4 @@ RUN npm install && npm run build
 # php-fpm 設定の listen アドレスを修正（Nginxからアクセス可能に）
 RUN sed -i 's/^listen = 127\.0\.0\.1:9000/listen = 0.0.0.0:9000/' /usr/local/etc/php-fpm.d/www.conf
 
-CMD ["php-fpm"]
+CMD ["php", "artisan", "serve", "--host=0.0.0.0", "--port=80"]
