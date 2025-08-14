@@ -3,19 +3,6 @@ services:
     build:
       context: ../..
       dockerfile: docker/dev2/Dockerfile
-    environment:
-      APP_ENV: production
-      APP_KEY: base64:xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-      APP_DEBUG: false
-      APP_URL: http://localhost
-      LOG_CHANNEL: stack
-
-      DB_CONNECTION: mysql
-      DB_HOST: mysql
-      DB_PORT: 3306
-      DB_DATABASE: laravel
-      DB_USERNAME: root
-      DB_PASSWORD: rootpass123
     volumes:
       - ../../:/var/www/html   # ←Laravelプロジェクト全体をマウント
     depends_on:
