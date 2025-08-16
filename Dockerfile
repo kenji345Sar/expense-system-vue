@@ -1,34 +1,26 @@
-FROM php:8.2-fpm
-
-# 必要なパッケージをインストール
-RUN curl -fsSL https://deb.nodesource.com/setup_18.x | bash - \
-    && apt-get update && apt-get install -y \
-    git \
-    curl \
-    zip \
-    unzip \
-    libpng-dev \
-    libonig-dev \
-    libxml2-dev \
-    nodejs \
-    && docker-php-ext-install pdo_mysql mbstring exif pcntl bcmath gd
-
-# Composer インストール
-COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
-
-WORKDIR /var/www/html
-
+# vendor
+FROM composer:2 AS vendor
+WORKDIR /app
+COPY composer.json composer.lock ./
+RUN composer install --no-interaction --no-dev --prefer-dist --no-scripts
 COPY . .
+RUN composer dump-autoload -o
 
-# Laravel の依存関係をインストール
-RUN composer install --optimize-autoloader --no-dev \
-    && php artisan config:cache \
-    && php artisan route:cache \
-    && php artisan view:cache
+# assets
+FROM node:18-bullseye AS assets
+WORKDIR /app
+COPY package*.json ./
+RUN npm ci --no-audit --fund=false
+COPY . .
+RUN npm run build
 
-RUN npm install && npm run build
-
-# php-fpm 設定の listen アドレスを修正（Nginxからアクセス可能に）
-RUN sed -i 's/^listen = 127\.0\.0\.1:9000/listen = 0.0.0.0:9000/' /usr/local/etc/php-fpm.d/www.conf
-
-CMD ["php", "artisan", "serve", "--host=0.0.0.0", "--port=80"]
+# runtime
+FROM php:8.2-fpm
+RUN docker-php-ext-install pdo_mysql
+WORKDIR /var/www/html
+COPY . .
+COPY --from=vendor /app/vendor ./vendor
+COPY --from=assets /app/public/build ./public/build
+RUN chown -R www-data:www-data storage bootstrap/cache && chmod -R 775 storage bootstrap/cache
+ENV APP_ENV=production
+CMD ["php-fpm"]

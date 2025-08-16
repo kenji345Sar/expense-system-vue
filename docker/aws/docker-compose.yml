@@ -2,40 +2,31 @@ services:
     app:
         build:
             context: ../..
-            dockerfile: docker/dev2/Dockerfile
-        volumes:
-            - ../../:/var/www/html   # ←Laravelプロジェクト全体をマウント
+            dockerfile: Dockerfile
         depends_on:
             - mysql
-        networks:
-            - laravel
+        networks: [laravel]
 
     web:
         image: nginx:stable-alpine
-        ports:
-            - "8080:80"
+        ports: ["80:80"]
         volumes:
-            - ../../:/var/www/html
-            - ../../docker/dev2/nginx.conf:/etc/nginx/conf.d/default.conf
+            - ./nginx.conf:/etc/nginx/conf.d/default.conf
         depends_on:
             - app
-        networks:
-            - laravel
+        networks: [laravel]
 
     mysql:
         image: mysql:8.0
         environment:
             MYSQL_ROOT_PASSWORD: rootpass123
             MYSQL_DATABASE: laravel
-        # MYSQL_USER: root
-        # MYSQL_PASSWORD: rootpass123
         volumes:
             - dbdata:/var/lib/mysql
-        networks:
-            - laravel
+        networks: [laravel]
 
 networks:
-    laravel:
+    laravel: {}
 
 volumes:
-    dbdata:
+    dbdata: {}
