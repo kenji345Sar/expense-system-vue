@@ -1,32 +1,44 @@
+version: "3.9"
+
 services:
     app:
         build:
-            context: ../..
-            dockerfile: Dockerfile
+            context: ../../
+            dockerfile: docker/aws/Dockerfile.app
+        image: expense-app:latest
+        container_name: aws-app
         depends_on:
             - mysql
-        networks: [laravel]
+        # まずは既存運用どおり .env を読む
+        env_file:
+            - ../../.env
+    # ← 安定してきたら .env.aws を作ってここを ../../.env.aws に変更
+    # bind mount はしない（イメージ内の public/build を守る）
+    # volumes: []
 
     web:
         image: nginx:stable-alpine
-        ports: ["80:80"]
-        volumes:
-            - ./nginx.conf:/etc/nginx/conf.d/default.conf
+        container_name: aws-web
         depends_on:
             - app
-        networks: [laravel]
+        ports:
+            - "80:80"
+        volumes:
+            - ../aws/nginx.conf:/etc/nginx/conf.d/default.conf:ro
+            - ../../:/var/www/html:ro  # 静的配信用に読むだけ（アセットはイメージ内にもある）
 
     mysql:
         image: mysql:8.0
+        container_name: aws-mysql
         environment:
-            MYSQL_ROOT_PASSWORD: rootpass123
-            MYSQL_DATABASE: laravel
+            MYSQL_DATABASE: ${DB_DATABASE}
+            MYSQL_USER: ${DB_USERNAME}
+            MYSQL_PASSWORD: ${DB_PASSWORD}
+            MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
         volumes:
-            - dbdata:/var/lib/mysql
-        networks: [laravel]
-
-networks:
-    laravel: {}
+            - aws-dbdata:/var/lib/mysql
+        ports:
+            - "3306:3306"
 
 volumes:
-    dbdata: {}
+    aws-dbdata:

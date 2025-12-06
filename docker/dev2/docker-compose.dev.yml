@@ -3,6 +3,8 @@ services:
     build:
       context: ../..
       dockerfile: docker/dev2/Dockerfile
+    ports:
+      - "5173:5173"  # Vite dev server
     volumes:
       - ../../:/var/www/html   # ←Laravelプロジェクト全体をマウント
     depends_on:

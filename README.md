@@ -17,52 +17,102 @@
 
 ---
 
-## 起動方法
-
-````bash
-git clone <このリポジトリ>
-cd expense-system-vue
-cp .env.example .env
-# 開発環境
- docker-compose -f docker/dev/docker-compose.yml up -d
-
-
-## Laravelアプリケーションサーバーの起動
+## セットアップ
 
 ```bash
+git clone <このリポジトリ>
+cd expense-system-vue3
+cp .env.example .env
+```
+
+---
+
+## 開発環境（dev1 / dev2）
+
+このプロジェクトでは、開発用に 2 種類の環境を用意しています。
+
+### dev1（最小構成 Laravel 環境）
+
+- Laravel 組み込みサーバーで動かすシンプルな環境です。
+- nginx / Vite / Vue は使わず、主に API や簡単な画面の確認用として利用します。
+- 軽く動作確認したいときや、バックエンドだけを素早く試したいときに使用します。
+
+**主な使い方（例）**
+
+```bash
+# コンテナ起動
+docker-compose -f docker/dev/docker-compose.yml up -d
+
 # Laravelアプリケーションコンテナに接続
 docker exec -it dev-app-1 bash
 
 # Laravel開発サーバーを起動（コンテナ内で実行）
 php artisan serve --host=0.0.0.0 --port=8000
-````
-
-```bash
-# 開発環境2
-
-docker-compose -f docker/prod/docker-compose.dev.yml up -d --build
 ```
 
-| 操作               | コマンド                                                             |
-| ------------------ | -------------------------------------------------------------------- |
-| コンテナ起動       | `docker-compose -f docker/prod/docker-compose.dev.yml up -d --build` |
-| コンテナ停止・削除 | `docker-compose -f docker/prod/docker-compose.dev.yml down`          |
-| ログ確認           | `docker-compose -f docker/prod/docker-compose.dev.yml logs -f`       |
+### dev2（推奨：本番構成に近い環境）
+
+- nginx + PHP-FPM + MySQL + Vue3 + Vite で構成された、本番に近い開発環境です。
+- Laravel + Vue の画面開発や、実際の運用に近い動作確認を行う場合は dev2 を標準として利用してください。
+- 現在はこちらの dev2 環境を正式な開発環境とみなします。
+
+#### dev2: コンテナの起動
 
 ```bash
-# 1. Blade キャッシュ削除
+# コンテナ一式の起動
+docker-compose -f docker/dev2/docker-compose.dev.yml -p expense-dev2 up -d
+```
 
-docker exec -it prod-app-1 php artisan view:clear
+#### dev2: Vite（フロントエンド開発サーバー）の起動
 
-# 2. その他 Laravel キャッシュ削除
+Vue コンポーネントを開発する場合は、app コンテナ内で Vite を起動します。
 
-docker exec -it prod-app-1 php artisan config:clear
-docker exec -it prod-app-1 php artisan route:clear
-docker exec -it prod-app-1 php artisan cache:clear
+```bash
+docker-compose -f docker/dev2/docker-compose.dev.yml -p expense-dev2 exec app npm run dev
+```
 
-# 3. ブラウザキャッシュ削除 or シークレットモードで再アクセス
+#### dev2: Laravel へのアクセス
+
+ブラウザから次の URL にアクセスします：
 
 ```
+http://localhost:8080
+```
+
+#### dev2: Laravel のコマンドを実行する
+
+```bash
+# コンテナ内シェルに入る
+docker-compose -f docker/dev2/docker-compose.dev.yml -p expense-dev2 exec app bash
+
+# 例：マイグレーション実行
+php artisan migrate
+
+# その他のコマンド例
+php artisan route:list
+php artisan tinker
+php artisan config:clear
+php artisan route:clear
+php artisan view:clear
+```
+
+#### dev2: コンテナの停止
+
+```bash
+docker-compose -f docker/dev2/docker-compose.dev.yml -p expense-dev2 down
+```
+
+### dev1 / dev2 の使い分け方針
+
+- **通常のアプリ開発・画面開発・本番に近い動作確認**
+  → **dev2 を利用（標準）**
+
+- **ちょっとした API 動作確認や、Laravel 単体での挙動を軽く試したいだけのケース**
+  → **dev1 を利用**
+
+dev1 と dev2 を併用する場合は、「どちらの環境で起動しているか」を常に意識し、ポート番号や起動コマンドを混同しないようにしてください。
+
+---
 
 ## 現在の開発ブランチと内容
 
