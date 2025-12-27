@@ -58,10 +58,27 @@
                     {{-- 操作 --}}
                     @if ($actions)
                         <td class="border px-3 py-2 space-x-1 text-center">
-                            <a href="{{ route($type . '.edit', $row->id) }}"
-                                class="bg-green-500 hover:bg-green-600 text-white text-xs px-3 py-1 rounded">編集</a>
-                            <a href="{{ route($type . '.apply', $row->id) }}"
-                                class="bg-blue-500 hover:bg-blue-600 text-white text-xs px-3 py-1 rounded">申請</a>
+                            {{-- 編集ボタン：Policy で判定 --}}
+                            @can('update', $row)
+                                <a href="{{ route($type . '.edit', $row->id) }}"
+                                    class="bg-green-500 hover:bg-green-600 text-white text-xs px-3 py-1 rounded">編集</a>
+                            @endcan
+
+                            {{-- 申請ボタン：Policy で判定 --}}
+                            @can('submit', $row)
+                                @php
+                                    $submitButtonText = $row->status === 'returned' ? '再申請' : '申請';
+                                @endphp
+                                <form action="{{ route($type . '.submit', $row->id) }}" method="POST" style="display:inline;">
+                                    @csrf
+                                    <button type="submit" class="bg-blue-500 hover:bg-blue-600 text-white text-xs px-3 py-1 rounded">{{ $submitButtonText }}</button>
+                                </form>
+                            @endcan
+
+                            {{-- 申請中の場合は非活性ボタンを表示 --}}
+                            @if ($row->status === 'submitted')
+                                <button type="button" disabled class="bg-gray-400 text-white text-xs px-3 py-1 rounded cursor-not-allowed">申請中</button>
+                            @endif
                         </td>
                     @endif
                 </tr>

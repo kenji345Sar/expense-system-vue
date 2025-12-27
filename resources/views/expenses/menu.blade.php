@@ -17,6 +17,13 @@
                 <li class="mb-2">
                     <a href="{{ route('expenses.all') }}" class="text-blue-500">全申請一覧</a>
                 </li>
+
+                {{-- 承認者のみ表示 --}}
+                @if (auth()->user()?->is_admin)
+                    <li class="mb-2">
+                        <a href="{{ route('approvals.index') }}" class="text-green-600 hover:underline font-semibold">承認待ち一覧</a>
+                    </li>
+                @endif
             </ul>
         </div>
     @endsection

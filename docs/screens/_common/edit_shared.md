@@ -8,13 +8,17 @@
 - **URL**：`/expenses/{type}/{id}/edit`
 - **HTTPメソッド**：GET（表示） / PUT or PATCH（更新）
 - **Controller**：
-  - 表示：`{Type}ExpenseController@edit`
-  - 更新：`{Type}ExpenseController@update`
-- **Bladeテンプレート**：`resources/views/expenses/edit.blade.php`（共通）
+  - 表示：`{Type}Controller@edit`（例：`TransportationController@edit`）
+  - 更新：`{Type}Controller@update`
+- **Bladeテンプレート**：`resources/views/expenses/form.blade.php`（共通・新規作成画面と同じ）
 - **渡すデータ**：
   - 対象となる expense データ
   - 対応する明細行データ（複数）
   - expense_type: 呼び出し元に応じたカテゴリ指定
+  - fields: `config/expense_headers.php` から生成されたフォーム用フィールド定義
+  - isEdit: `true`（編集モードフラグ）
+
+> **参考**: フィールド定義の仕組みについては [`config_driven_ui.md`](./config_driven_ui.md) を参照してください。
 
 ---
 
@@ -30,10 +34,20 @@
 
 ## 表示項目（共通画面）
 
-- `create.blade.php` に準拠し、以下を編集可能：
+- `expenses/form.blade.php`（新規作成と同じ）に準拠し、以下を編集可能：
   - 明細の追加・削除・修正
   - 備考・金額・経路など各項目
   - 添付ファイルの再アップロードまたは削除（任意）
+
+### フィールド自動生成の仕組み
+
+- 新規作成画面と同じく、`config/expense_headers.php` から自動生成されます
+- `BaseExpenseController->buildFormView()` が以下のフィールドを除外：
+  - `id`（自動採番）
+  - `user.name`（ログインユーザーから自動取得）
+  - `status`（システムが承認フローで自動制御）
+- 編集時は `$isEdit = true` フラグで新規作成と区別
+- 詳細は [`config_driven_ui.md`](./config_driven_ui.md) を参照
 
 ---
 
@@ -41,7 +55,9 @@
 
 - 明細に対して再バリデーション
 - 編集中のステータスが `draft` のときのみ許可
-- `submitted` / `approved` の編集は禁止（Controller or Policy で制御）
+- `submitted` / `approved` / `returned` の編集は禁止（Controller or Policy で制御）
+
+> **注意**: ステータスフィールドはフォームに表示されないため、ユーザーが直接ステータスを変更することはできません。ステータスは承認フロー（申請・承認・差戻し）によってのみ変更されます。
 
 ---
 

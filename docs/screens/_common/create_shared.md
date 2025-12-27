@@ -8,13 +8,16 @@
 -   **URL**：`/expenses/{type}/create`（例：`transportation`, `business_trip`, etc.）
 -   **HTTP メソッド**：GET（表示） / POST（登録）
 -   **Controller**：
-    -   表示：`{Type}ExpenseController@create`
-    -   登録：`{Type}ExpenseController@store`
--   **Blade テンプレート**：`resources/views/expenses/create.blade.php`（共通）
+    -   表示：`{Type}Controller@create`（例：`TransportationController@create`）
+    -   登録：`{Type}Controller@store`
+-   **Blade テンプレート**：`resources/views/expenses/form.blade.php`（共通・編集画面と同じ）
 -   **渡すデータ**：
     -   ログインユーザー情報（`auth()`）
     -   初期状態の明細行（1 行）
     -   expense_type: 呼び出し元に応じたカテゴリ指定
+    -   fields: `config/expense_headers.php` から生成されたフォーム用フィールド定義
+
+> **参考**: フィールド定義の仕組みについては [`config_driven_ui.md`](./config_driven_ui.md) を参照してください。
 
 ---
 
@@ -36,6 +39,15 @@
 | 添付ファイル | 複数アップロード可能（任意）          |
 | 備考         | 経費全体に対する自由入力欄            |
 | 登録・戻る   | 登録：POST 送信、戻る：一覧画面へ遷移 |
+
+### フィールド自動生成の仕組み
+
+- 表示される入力フィールドは `config/expense_headers.php` から自動生成されます
+- `BaseExpenseController->buildFormView()` が以下のフィールドを除外してフォーム用フィールドを構築：
+  - `id`（自動採番）
+  - `user.name`（ログインユーザーから自動取得）
+  - `status`（システムが承認フローで自動制御）
+- 詳細は [`config_driven_ui.md`](./config_driven_ui.md) を参照
 
 ---
 

@@ -7,6 +7,7 @@ if (!function_exists('expense_status_label')) {
       'draft' => '下書き',
       'submitted' => '申請中',
       'approved' => '承認済',
+      'returned' => '差戻し',
     ][$status] ?? '未連携';
   }
 }

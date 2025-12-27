@@ -24,7 +24,7 @@ abstract class BaseExpenseController extends Controller
   {
     $allFields = config("expense_headers.$configKey");
     $formFields = array_values(array_filter($allFields, function ($field) {
-      return !in_array($field['key'], ['id', 'user.name']);
+      return !in_array($field['key'], ['id', 'user.name', 'status']);
     }));
 
     return view('expenses.form', [

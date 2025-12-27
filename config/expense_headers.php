@@ -9,6 +9,7 @@ return [
     ['key' => 'arrival', 'label' => '到着地', 'source' => 'detail', 'required' => true],
     ['key' => 'route', 'label' => '経路', 'source' => 'detail', 'required' => true],
     ['key' => 'amount', 'label' => '金額', 'source' => 'expense', 'formatter' => 'yen', 'type' => 'number', 'required' => true],
+    ['key' => 'status', 'label' => 'ステータス', 'source' => 'expense', 'formatter' => 'status', 'required' => false],
   ],
   'supplies' => [
     ['key' => 'id', 'label' => 'ID', 'source' => 'expense', 'required' => true],
@@ -19,6 +20,7 @@ return [
     ['key' => 'unit_price', 'label' => '単価', 'source' => 'detail', 'type' => 'number', 'required' => true],
     ['key' => 'remarks', 'label' => '備考', 'source' => 'detail', 'required' => false],
     ['key' => 'total_price', 'label' => '金額', 'source' => 'detail', 'formatter' => 'yen', 'type' => 'number', 'required' => true],
+    ['key' => 'status', 'label' => 'ステータス', 'source' => 'expense', 'formatter' => 'status', 'required' => false],
   ],
   'business_trip' => [
     ['key' => 'id', 'label' => 'ID', 'source' => 'expense', 'required' => true],
@@ -29,6 +31,7 @@ return [
     ['key' => 'purpose', 'label' => '目的', 'source' => 'detail', 'required' => true],
     ['key' => 'remarks', 'label' => '備考', 'source' => 'detail', 'required' => false],
     ['key' => 'amount', 'label' => '金額', 'source' => 'expense', 'formatter' => 'yen', 'type' => 'number', 'required' => true],
+    ['key' => 'status', 'label' => 'ステータス', 'source' => 'expense', 'formatter' => 'status', 'required' => false],
   ],
   'entertainment' => [
     ['key' => 'id', 'label' => 'ID', 'source' => 'expense', 'required' => true],
@@ -38,5 +41,6 @@ return [
     ['key' => 'place', 'label' => '場所', 'source' => 'detail', 'required' => true],
     ['key' => 'content', 'label' => '内容', 'source' => 'detail', 'required' => true],
     ['key' => 'amount', 'label' => '金額', 'source' => 'expense', 'formatter' => 'yen', 'type' => 'number', 'required' => true],
+    ['key' => 'status', 'label' => 'ステータス', 'source' => 'expense', 'formatter' => 'status', 'required' => false],
   ],
 ];

@@ -14,14 +14,17 @@ class ExpenseApprovalController extends Controller
         $user = auth()->user();
 
         if ($user?->is_admin) {
-            $expenses = Expense::orderBy('date', 'desc')->get();
+            $expenses = Expense::where('status', 'submitted')
+                ->orderBy('date', 'desc')
+                ->get();
         } else {
             $expenses = Expense::where('user_id', $user->id)
+                ->where('status', 'submitted')
                 ->orderBy('date', 'desc')
                 ->get();
         }
 
-        return view('expenses.index', compact('expenses'));
+        return view('approvals.index', compact('expenses'));
     }
 
     public function approve($id)

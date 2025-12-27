@@ -52,6 +52,10 @@ class Expense extends Model
     {
         return $this->belongsTo(User::class, 'approver_id');
     }
+
     // 承認ステータスの定数
-    const STATUS_SUBMITTED = 'submitted'; // 申請中         
+    const STATUS_DRAFT     = 'draft';     // 下書き
+    const STATUS_SUBMITTED = 'submitted'; // 申請中（既存）
+    const STATUS_APPROVED  = 'approved';  // 承認済
+    const STATUS_RETURNED  = 'returned';  // 差戻し
 }

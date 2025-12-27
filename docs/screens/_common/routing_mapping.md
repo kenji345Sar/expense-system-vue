@@ -21,41 +21,87 @@
 
 ## 一覧画面（カテゴリ別）
 
-| 画面名                 | md ファイル               | Blade ファイルパス                               | ルートパス                 | HTTP メソッド | Controller                    |
-| ---------------------- | ------------------------- | ------------------------------------------------ | -------------------------- | ------------- | ----------------------------- |
-| 交通費一覧画面         | `transportation_index.md` | `resources/views/transportation/index.blade.php` | `/expenses/transportation` | GET           | `ExpenseController@index`     |
-| 出張旅費一覧画面       | `business_trip_index.md`  | `resources/views/business_trip/index.blade.php`  | `/expenses/business_trip`  | GET           | `ExpenseController@index`     |
-| 接待交際費一覧画面     | `entertainment_index.md`  | `resources/views/entertainment/index.blade.php`  | `/expenses/entertainment`  | GET           | `ExpenseController@index`     |
-| 備品・消耗品費一覧画面 | `supplies_index.md`       | `resources/views/supplies/index.blade.php`       | `/expenses/supplies`       | GET           | `ExpenseController@index`     |
-| 全体一覧画面           | `all_expenses_index.md`   | `resources/views/expenses/all.blade.php`         | `/expenses/all`            | GET           | `AllExpensesController@index` |
+※ すべての経費種別で **共通の Blade ファイル** (`expenses/index.blade.php`) を使用し、`$type` パラメータで表示内容を切り替えています。
+
+| 画面名                 | md ファイル               | Blade ファイルパス                         | ルートパス                 | route 名               | HTTP メソッド | Controller                       |
+| ---------------------- | ------------------------- | ------------------------------------------ | -------------------------- | ---------------------- | ------------- | -------------------------------- |
+| 交通費一覧画面         | `transportation_index.md` | `resources/views/expenses/index.blade.php` | `/expenses/transportation` | `transportation.index` | GET           | `TransportationController@index` |
+| 出張旅費一覧画面       | `business_trip_index.md`  | `resources/views/expenses/index.blade.php` | `/expenses/business_trip`  | `business_trip.index`  | GET           | `BusinessTripController@index`   |
+| 接待交際費一覧画面     | `entertainment_index.md`  | `resources/views/expenses/index.blade.php` | `/expenses/entertainment`  | `entertainment.index`  | GET           | `EntertainmentController@index`  |
+| 備品・消耗品費一覧画面 | `supplies_index.md`       | `resources/views/expenses/index.blade.php` | `/expenses/supply`         | `supplies.index`       | GET           | `SupplyController@index`         |
+| 全体一覧画面           | `all_expenses_index.md`   | `resources/views/expenses/all.blade.php`   | `/expenses/all`            | `expenses.all`         | GET           | `AllExpensesController@index`    |
 
 ---
 
 ## 新規作成画面
 
-| 画面名               | md ファイル                       | Blade ファイルパス                                          | ルートパス                | HTTP メソッド | Controller                             |
-| -------------------- | --------------------------------- | ----------------------------------------------------------- | ------------------------- | ------------- | -------------------------------------- |
-| 新規作成画面（共通） | `create_expense_shared.md`        | `resources/views/expenses/create.blade.php`                 | `/expenses/{type}/create` | GET           | `ExpenseController@create`             |
-| 登録処理             | —                                 | —                                                           | `/expenses/{type}`        | POST          | `ExpenseController@store`              |
-| 出張旅費補助         | `create_expense_business_trip.md` | `resources/views/business_trip/create_additional.blade.php` | ※補助用途                 | GET           | `BusinessTripExpenseController@create` |
+※ すべての経費種別で **共通の Blade ファイル** (`expenses/form.blade.php`) を使用し、`$type` パラメータでフィールド定義を切り替えています。
+※ 編集画面も同じ `form.blade.php` を使用し、`$isEdit` フラグで新規/編集を切り替えます。
+
+| 画面名                   | md ファイル                | Blade ファイルパス                      | ルートパス                       | route 名               | HTTP メソッド | Controller                         |
+| ------------------------ | -------------------------- | --------------------------------------- | -------------------------------- | ---------------------- | ------------- | ---------------------------------- |
+| 交通費新規作成フォーム   | `create_expense_shared.md` | `resources/views/expenses/form.blade.php` | `/expenses/transportation/create` | `transportation.create` | GET           | `TransportationController@create`  |
+| 交通費登録処理           | —                          | —                                       | `/expenses/transportation`       | `transportation.store` | POST          | `TransportationController@store`   |
+| 出張旅費新規作成フォーム | `create_expense_shared.md` | `resources/views/expenses/form.blade.php` | `/expenses/business_trip/create` | `business_trip.create` | GET           | `BusinessTripController@create`    |
+| 出張旅費登録処理         | —                          | —                                       | `/expenses/business_trip`        | `business_trip.store`  | POST          | `BusinessTripController@store`     |
+| 接待費新規作成フォーム   | `create_expense_shared.md` | `resources/views/expenses/form.blade.php` | `/expenses/entertainment/create` | `entertainment.create` | GET           | `EntertainmentController@create`   |
+| 接待費登録処理           | —                          | —                                       | `/expenses/entertainment`        | `entertainment.store`  | POST          | `EntertainmentController@store`    |
+| 備品新規作成フォーム     | `create_expense_shared.md` | `resources/views/expenses/form.blade.php` | `/expenses/supply/create`        | `supplies.create`      | GET           | `SupplyController@create`          |
+| 備品登録処理             | —                          | —                                       | `/expenses/supply`               | `supplies.store`       | POST          | `SupplyController@store`           |
 
 ---
 
-## 編集画面（共通）
+## 編集画面
 
-| 画面名           | md ファイル              | Blade ファイルパス                        | ルートパス                   | HTTP メソッド | Controller                 |
-| ---------------- | ------------------------ | ----------------------------------------- | ---------------------------- | ------------- | -------------------------- |
-| 編集画面（共通） | `edit_expense_shared.md` | `resources/views/expenses/edit.blade.php` | `/expenses/{type}/{id}/edit` | GET           | `ExpenseController@edit`   |
-| 更新処理         | —                        | —                                         | `/expenses/{type}/{id}`      | PUT           | `ExpenseController@update` |
+※ 新規作成と **同じ** `expenses/form.blade.php` を使用し、`$isEdit=true` で編集モードに切り替えます。
+
+| 画面名               | md ファイル              | Blade ファイルパス                        | ルートパス                            | route 名                | HTTP メソッド | Controller                      |
+| -------------------- | ------------------------ | ----------------------------------------- | ------------------------------------- | ----------------------- | ------------- | ------------------------------- |
+| 交通費編集フォーム   | `edit_expense_shared.md` | `resources/views/expenses/form.blade.php` | `/expenses/transportation/{id}/edit`  | `transportation.edit`   | GET           | `TransportationController@edit` |
+| 交通費更新処理       | —                        | —                                         | `/expenses/transportation/{id}`       | `transportation.update` | PUT/PATCH     | `TransportationController@update` |
+| 出張旅費編集フォーム | `edit_expense_shared.md` | `resources/views/expenses/form.blade.php` | `/expenses/business_trip/{id}/edit`   | `business_trip.edit`    | GET           | `BusinessTripController@edit`   |
+| 出張旅費更新処理     | —                        | —                                         | `/expenses/business_trip/{id}`        | `business_trip.update`  | PUT/PATCH     | `BusinessTripController@update` |
+| 接待費編集フォーム   | `edit_expense_shared.md` | `resources/views/expenses/form.blade.php` | `/expenses/entertainment/{id}/edit`   | `entertainment.edit`    | GET           | `EntertainmentController@edit`  |
+| 接待費更新処理       | —                        | —                                         | `/expenses/entertainment/{id}`        | `entertainment.update`  | PUT/PATCH     | `EntertainmentController@update` |
+| 備品編集フォーム     | `edit_expense_shared.md` | `resources/views/expenses/form.blade.php` | `/expenses/supply/{id}/edit`          | `supplies.edit`         | GET           | `SupplyController@edit`         |
+| 備品更新処理         | —                        | —                                         | `/expenses/supply/{id}`               | `supplies.update`       | PUT/PATCH     | `SupplyController@update`       |
 
 ---
 
-## 申請処理・削除・CSV 出力
+## 申請処理（draft → submitted）
 
-| 処理名       | md ファイル         | Blade ファイルパス | ルートパス                     | HTTP メソッド | Controller                    |
-| ------------ | ------------------- | ------------------ | ------------------------------ | ------------- | ----------------------------- |
-| 申請処理     | `approval_logic.md` | —                  | `/expenses/{type}/{id}/submit` | POST          | `ExpenseController@submit`    |
-| 削除処理     | —                   | —                  | `/expenses/{type}/{id}`        | DELETE        | `ExpenseController@destroy`   |
-| CSV 出力処理 | —                   | —                  | `/expenses/{type}/export`      | GET           | `ExpenseController@exportCsv` |
+※ 各経費種別で共通の `ExpenseSubmitController` を使用します。
+
+| 処理名               | md ファイル         | Blade ファイルパス | ルートパス                                | route 名               | HTTP メソッド | Controller                       |
+| -------------------- | ------------------- | ------------------ | ----------------------------------------- | ---------------------- | ------------- | -------------------------------- |
+| 交通費申請処理       | `approval_logic.md` | —                  | `/expenses/transportation/{expense}/submit` | `transportation.submit` | POST          | `ExpenseSubmitController@submit` |
+| 出張旅費申請処理     | `approval_logic.md` | —                  | `/expenses/business_trip/{expense}/submit` | `business_trip.submit` | POST          | `ExpenseSubmitController@submit` |
+| 接待費申請処理       | `approval_logic.md` | —                  | `/expenses/entertainment/{expense}/submit` | `entertainment.submit` | POST          | `ExpenseSubmitController@submit` |
+| 備品申請処理         | `approval_logic.md` | —                  | `/expenses/supply/{expense}/submit`        | `supplies.submit`      | POST          | `ExpenseSubmitController@submit` |
+| 共通申請処理（予備） | `approval_logic.md` | —                  | `/approvals/expenses/{expense}/submit`     | `expenses.submit`      | POST          | `ExpenseSubmitController@submit` |
+
+---
+
+## 承認機能（submitted → approved / returned）
+
+※ 承認者（is_admin=true）のみが実行可能
+
+| 処理名         | md ファイル         | Blade ファイルパス                          | ルートパス                  | route 名          | HTTP メソッド | Controller                        |
+| -------------- | ------------------- | ------------------------------------------- | --------------------------- | ----------------- | ------------- | --------------------------------- |
+| 承認待ち一覧   | `approval_logic.md` | `resources/views/approvals/index.blade.php` | `/approvals`                | `approvals.index` | GET           | `ExpenseApprovalController@index` |
+| 承認処理       | `approval_logic.md` | —                                           | `/approvals/{id}/approve`   | `approvals.approve` | POST          | `ExpenseApprovalController@approve` |
+| 差戻し処理     | `approval_logic.md` | —                                           | `/approvals/{id}/return`    | `approvals.return` | POST          | `ExpenseApprovalController@return` |
+
+---
+
+## 削除・CSV 出力
+
+| 処理名           | md ファイル | Blade ファイルパス | ルートパス                       | route 名                | HTTP メソッド | Controller                      |
+| ---------------- | ----------- | ------------------ | -------------------------------- | ----------------------- | ------------- | ------------------------------- |
+| 交通費削除処理   | —           | —                  | `/expenses/transportation/{id}`  | `transportation.destroy` | DELETE        | `TransportationController@destroy` |
+| 出張旅費削除処理 | —           | —                  | `/expenses/business_trip/{id}`   | `business_trip.destroy` | DELETE        | `BusinessTripController@destroy` |
+| 接待費削除処理   | —           | —                  | `/expenses/entertainment/{id}`   | `entertainment.destroy` | DELETE        | `EntertainmentController@destroy` |
+| 備品削除処理     | —           | —                  | `/expenses/supply/{id}`          | `supplies.destroy`      | DELETE        | `SupplyController@destroy`      |
+| CSV 出力処理     | —           | —                  | `/expenses/export`               | `expenses.export`       | GET           | `AllExpensesController@export`  |
 
 ---

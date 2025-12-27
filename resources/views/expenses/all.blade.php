@@ -92,6 +92,8 @@
                             <th class="border px-4 py-2 text-left font-semibold">種別</th>
                             <th class="border px-4 py-2 text-left font-semibold">申請者</th>
                             <th class="border px-4 py-2 text-right font-semibold">金額</th>
+                            <th class="border px-4 py-2 text-left font-semibold">ステータス</th>
+
                         </tr>
                     </thead>
                     <tbody>
@@ -102,6 +104,7 @@
                                 <td class="border px-4 py-2">{{ $expense->expense_type }}</td>
                                 <td class="border px-4 py-2">{{ $expense->user->name }}</td>
                                 <td class="border px-4 py-2 text-right">{{ number_format($expense->amount) }}</td>
+                                <td class="border px-4 py-2">{{ expense_status_label($expense->status) }}</td>
                             </tr>
                         @endforeach
                     </tbody>

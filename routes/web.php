@@ -8,7 +8,8 @@ use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\EntertainmentController;
 use App\Http\Controllers\SupplyController;
 use App\Http\Controllers\AllExpensesController;
-
+use App\Http\Controllers\ExpenseApprovalController;
+use App\Http\Controllers\ExpenseSubmitController;
 
 
 Route::get('/', function () {
@@ -36,13 +37,32 @@ Route::get('/expenses/index', fn() => 'dummy expenses')->name('expenses.index');
 // routes/web.php
 Route::get('/expenses/export', [AllExpensesController::class, 'export'])->name('expenses.export');
 
+// 承認機能
+Route::middleware(['auth'])->prefix('approvals')->group(function () {
+    Route::get('/', [ExpenseApprovalController::class, 'index'])->name('approvals.index');
+    Route::post('/{id}/approve', [ExpenseApprovalController::class, 'approve'])->name('approvals.approve');
+    Route::post('/{id}/return', [ExpenseApprovalController::class, 'return'])->name('approvals.return');
 
-// 以下は未実装のルートに対するダミー
-// Route::get('/expenses/business_trip', fn() => 'dummy business_trip')->name('business_trip.index');
-Route::get('/expenses/business_trip/submit', fn() => 'dummy business_trip')->name('business_trip.submit');
-Route::get('/expenses/transportation/submit', fn() => 'dummy transportation')->name('transportation.submit');
-Route::get('/expenses/supply/submit', fn() => 'dummy transportation')->name('supplies.submit');
-Route::get('/expenses/entertainment/submit', fn() => 'dummy entertainment')->name('entertainment.submit');
+    // 申請（draft -> submitted）
+    Route::post('/expenses/{expense}/submit', [ExpenseSubmitController::class, 'submit'])
+        ->name('expenses.submit');
+});
+
+
+// 申請（draft -> submitted）※互換ルート：カテゴリ別 submit 名を維持
+Route::middleware(['auth'])->group(function () {
+    Route::post('/expenses/business_trip/{expense}/submit', [ExpenseSubmitController::class, 'submit'])
+        ->name('business_trip.submit');
+
+    Route::post('/expenses/transportation/{expense}/submit', [ExpenseSubmitController::class, 'submit'])
+        ->name('transportation.submit');
+
+    Route::post('/expenses/supply/{expense}/submit', [ExpenseSubmitController::class, 'submit'])
+        ->name('supplies.submit');
+
+    Route::post('/expenses/entertainment/{expense}/submit', [ExpenseSubmitController::class, 'submit'])
+        ->name('entertainment.submit');
+});
 
 
 
