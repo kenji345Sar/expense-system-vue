@@ -60,7 +60,7 @@ php artisan serve --host=0.0.0.0 --port=8000
 
 ```bash
 # コンテナ一式の起動
-docker-compose -f docker/dev2/docker-compose.dev.yml -p expense-dev2 up -d
+docker compose -f docker/dev2/docker-compose.dev.yml up -d
 ```
 
 #### dev2: Vite（フロントエンド開発サーバー）の起動
@@ -68,7 +68,7 @@ docker-compose -f docker/dev2/docker-compose.dev.yml -p expense-dev2 up -d
 Vue コンポーネントを開発する場合は、app コンテナ内で Vite を起動します。
 
 ```bash
-docker-compose -f docker/dev2/docker-compose.dev.yml -p expense-dev2 exec app npm run dev
+docker compose -f docker/dev2/docker-compose.dev.yml exec app npm run dev -- --host 0.0.0.0
 ```
 
 #### dev2: Laravel へのアクセス
@@ -83,7 +83,7 @@ http://localhost:8080
 
 ```bash
 # コンテナ内シェルに入る
-docker-compose -f docker/dev2/docker-compose.dev.yml -p expense-dev2 exec app bash
+docker compose -f docker/dev2/docker-compose.dev.yml exec app bash
 
 # 例：マイグレーション実行
 php artisan migrate
@@ -99,7 +99,7 @@ php artisan view:clear
 #### dev2: コンテナの停止
 
 ```bash
-docker-compose -f docker/dev2/docker-compose.dev.yml -p expense-dev2 down
+docker compose -f docker/dev2/docker-compose.dev.yml down
 ```
 
 ### dev1 / dev2 の使い分け方針

@@ -31,6 +31,18 @@
                 </select>
             </div>
 
+            {{-- ステータス --}}
+            <div class="flex flex-col">
+                <label for="status" class="block text-sm font-medium text-gray-700 mb-1">ステータス：</label>
+                <select name="status[]" id="status" class="form-multiselect w-64" multiple size="4"
+                    onchange="submitForm()">
+                    <option value="draft" {{ collect(request('status'))->contains('draft') ? 'selected' : '' }}>下書き</option>
+                    <option value="submitted" {{ collect(request('status'))->contains('submitted') ? 'selected' : '' }}>申請中</option>
+                    <option value="approved" {{ collect(request('status'))->contains('approved') ? 'selected' : '' }}>承認済</option>
+                    <option value="returned" {{ collect(request('status'))->contains('returned') ? 'selected' : '' }}>差戻し</option>
+                </select>
+            </div>
+
             {{-- 日付（開始） --}}
             <div class="flex flex-col">
                 <label class="block text-sm font-medium text-gray-700 mb-1">日付（開始）:</label>
@@ -44,6 +56,13 @@
                 <input type="date" name="date_to" value="{{ request('date_to') }}" class="form-input w-48"
                     onchange="submitForm()">
             </div>
+
+            {{-- リセットボタン --}}
+            <div class="flex flex-col justify-end">
+                <button type="button" onclick="resetFilters()" class="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600">
+                    検索条件をクリア
+                </button>
+            </div>
         </form>
 
 
@@ -53,6 +72,9 @@
                 <input type="hidden" name="csv_type" value="{{ request('csv_type') }}">
                 @foreach ((array) request('type') as $type)
                     <input type="hidden" name="type[]" value="{{ $type }}">
+                @endforeach
+                @foreach ((array) request('status') as $status)
+                    <input type="hidden" name="status[]" value="{{ $status }}">
                 @endforeach
                 <input type="hidden" name="date_from" value="{{ request('date_from') }}">
                 <input type="hidden" name="date_to" value="{{ request('date_to') }}">
@@ -71,6 +93,9 @@
                 <table class="min-w-full table-auto border border-gray-300 mb-6">
                     <thead class="bg-gray-100">
                         <tr>
+                            <th class="border px-4 py-2 text-center font-semibold w-12">
+                                チェック
+                            </th>
                             <th class="border px-4 py-2 text-left font-semibold">
                                 <a
                                     href="{{ route('expenses.all', array_merge(request()->query(), ['sort' => 'id', 'direction' => request('direction') === 'asc' ? 'desc' : 'asc'])) }}">
@@ -99,6 +124,9 @@
                     <tbody>
                         @foreach ($expenses as $expense)
                             <tr class="hover:bg-gray-50">
+                                <td class="border px-4 py-2 text-center">
+                                    <input type="checkbox" name="expense_ids[]" value="{{ $expense->id }}" class="expense-checkbox form-checkbox h-5 w-5">
+                                </td>
                                 <td class="border px-4 py-2">{{ $expense->id }}</td>
                                 <td class="border px-4 py-2">{{ $expense->date }}</td>
                                 <td class="border px-4 py-2">{{ $expense->expense_type }}</td>
@@ -120,6 +148,9 @@
                 <table class="min-w-full table-auto border border-gray-300 mb-6">
                     <thead class="bg-gray-100">
                         <tr>
+                            <th class="border px-4 py-2 text-center font-semibold w-12">
+                                チェック
+                            </th>
                             <th class="border px-4 py-2 text-left font-semibold">伝票番号</th>
                             <th class="border px-4 py-2 text-left font-semibold">日付</th>
                             <th class="border px-4 py-2 text-left font-semibold">種別</th>
@@ -130,6 +161,9 @@
                     <tbody>
                         @foreach ($details as $row)
                             <tr class="hover:bg-gray-50">
+                                <td class="border px-4 py-2 text-center">
+                                    <input type="checkbox" name="detail_ids[]" value="{{ $row['伝票番号'] }}" class="detail-checkbox form-checkbox h-5 w-5">
+                                </td>
                                 <td class="border px-4 py-2">{{ $row['伝票番号'] }}</td>
                                 <td class="border px-4 py-2">{{ $row['日付'] }}</td>
                                 <td class="border px-4 py-2">{{ $row['種別'] }}</td>
@@ -159,6 +193,10 @@
     <script>
         function submitForm() {
             document.getElementById('search-form').submit();
+        }
+
+        function resetFilters() {
+            window.location.href = "{{ route('expenses.all') }}";
         }
     </script>
 @endpush

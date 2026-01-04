@@ -35,6 +35,7 @@ class AllExpensesController extends Controller
 
         $filters = [
             'type' => $expenseTypes, // 配列で取得
+            'status' => $request->input('status', []), // ステータスフィルタを追加
             'date_from' => $request->input('date_from'),
             'date_to' => $request->input('date_to'),
         ];
@@ -59,6 +60,9 @@ class AllExpensesController extends Controller
             // ▼ ここで検索条件を適用
             if (!empty($filters['type'])) {
                 $query->whereIn('expense_type', $filters['type']);
+            }
+            if (!empty($filters['status'])) {
+                $query->whereIn('status', $filters['status']);
             }
             if (!empty($filters['date_from'])) {
                 $query->whereDate('date', '>=', $filters['date_from']);
@@ -93,6 +97,7 @@ class AllExpensesController extends Controller
 
         $filters = [
             'type' => $request->input('type', []),
+            'status' => $request->input('status', []),
             'date_from' => $request->input('date_from'),
             'date_to' => $request->input('date_to'),
         ];
@@ -102,6 +107,7 @@ class AllExpensesController extends Controller
         } else {
             $data = Expense::with('user')
                 ->when($filters['type'], fn($q) => $q->whereIn('expense_type', $filters['type']))
+                ->when($filters['status'], fn($q) => $q->whereIn('status', $filters['status']))
                 ->when($filters['date_from'], fn($q) => $q->whereDate('date', '>=', $filters['date_from']))
                 ->when($filters['date_to'], fn($q) => $q->whereDate('date', '<=', $filters['date_to']))
                 ->orderBy('date', 'desc')

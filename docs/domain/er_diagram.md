@@ -24,7 +24,8 @@
 | カラム名    | 型               | Null | Key | Default | Extra           |
 |-------------|------------------|------|-----|---------|-----------------|
 | id          | bigint unsigned  | NO   | PRI | NULL    | auto_increment  |
-| date        | date             | NO   |     | NULL    |                 |
+| expense_id  | bigint unsigned  | YES  | MUL | NULL    |                 |
+| supply_date | date             | NO   |     | NULL    |                 |
 | item_name   | varchar(255)     | NO   |     | NULL    |                 |
 | quantity    | int              | NO   |     | NULL    |                 |
 | unit_price  | int              | NO   |     | NULL    |                 |
@@ -60,6 +61,7 @@
 | カラム名            | 型               | Null | Key | Default | Extra           |
 |---------------------|------------------|------|-----|---------|-----------------|
 | id                  | bigint unsigned  | NO   | PRI | NULL    | auto_increment  |
+| expense_id          | bigint unsigned  | YES  | MUL | NULL    |                 |
 | entertainment_date  | date             | NO   |     | NULL    |                 |
 | client_name         | varchar(255)     | NO   |     | NULL    |                 |
 | place               | varchar(255)     | NO   |     | NULL    |                 |
@@ -76,6 +78,8 @@
 | カラム名            | 型               | Null | Key | Default | Extra           |
 |---------------------|------------------|------|-----|---------|-----------------|
 | id                  | bigint unsigned  | NO   | PRI | NULL    | auto_increment  |
+| user_id             | bigint unsigned  | YES  | MUL | NULL    |                 |
+| expense_id          | bigint unsigned  | YES  | MUL | NULL    |                 |
 | departure           | varchar(255)     | NO   |     | NULL    |                 |
 | business_trip_date  | date             | NO   |     | NULL    |                 |
 | destination         | varchar(255)     | NO   |     | NULL    |                 |

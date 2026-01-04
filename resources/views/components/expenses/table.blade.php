@@ -69,15 +69,18 @@
                                 @php
                                     $submitButtonText = $row->status === 'returned' ? '再申請' : '申請';
                                 @endphp
-                                <form action="{{ route($type . '.submit', $row->id) }}" method="POST" style="display:inline;">
+                                <form action="{{ route($type . '.submit', $row->id) }}" method="POST"
+                                    style="display:inline;">
                                     @csrf
-                                    <button type="submit" class="bg-blue-500 hover:bg-blue-600 text-white text-xs px-3 py-1 rounded">{{ $submitButtonText }}</button>
+                                    <button type="submit"
+                                        class="bg-blue-500 hover:bg-blue-600 text-white text-xs px-3 py-1 rounded">{{ $submitButtonText }}</button>
                                 </form>
                             @endcan
 
                             {{-- 申請中の場合は非活性ボタンを表示 --}}
                             @if ($row->status === 'submitted')
-                                <button type="button" disabled class="bg-gray-400 text-white text-xs px-3 py-1 rounded cursor-not-allowed">申請中</button>
+                                <button type="button" disabled
+                                    class="bg-gray-400 text-white text-xs px-3 py-1 rounded cursor-not-allowed">申請中</button>
                             @endif
                         </td>
                     @endif
